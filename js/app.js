@@ -148,7 +148,7 @@ function showSizeGuideToast() {
 }
 
 /* ==========================================================================
-   PRODUCT RENDERING & CARDS WITH DIRECT SIZE SELECTOR
+   PRODUCT RENDERING & CARDS WITH DIRECT CLICKABLE MEDIA & SIZE SELECTOR
    ========================================================================== */
 function createProductCardHTML(product) {
   if (!product) return '';
@@ -170,7 +170,7 @@ function createProductCardHTML(product) {
 
   return `
     <div class="product-card" data-id="${product.id}">
-      <div class="product-media">
+      <div class="product-media" onclick="openProductModal('${product.id}')" style="cursor: pointer;">
         <div class="card-badges">${badgesHTML}</div>
         <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite('${product.id}', event)" title="Favorito">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? '#ff2a5f' : 'none'}" stroke="currentColor" stroke-width="2">
@@ -198,13 +198,16 @@ function createProductCardHTML(product) {
 
         <div class="product-footer">
           <span class="product-price">${displayPrice}</span>
-          <button class="btn-add-cart-icon" onclick="quickAddToCart('${product.id}', event)" title="Agregar al Carrito">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-          </button>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.72rem;" onclick="openProductModal('${product.id}')">VER 👁️</button>
+            <button class="btn-add-cart-icon" onclick="quickAddToCart('${product.id}', event)" title="Agregar al Carrito">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
