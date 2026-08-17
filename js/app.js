@@ -148,7 +148,7 @@ function showSizeGuideToast() {
 }
 
 /* ==========================================================================
-   PRODUCT RENDERING & CARDS
+   PRODUCT RENDERING & CARDS WITH DIRECT SIZE SELECTOR
    ========================================================================== */
 function createProductCardHTML(product) {
   if (!product) return '';
@@ -159,7 +159,14 @@ function createProductCardHTML(product) {
   }).join('');
 
   const displayPrice = product.formattedPrice || formatCOP(product.price);
-  const sizeChipsPreview = (product.sizes || [38,39,40,41,42,43,44]).map(s => `<span style="display:inline-block; padding: 2px 6px; background:#1e1e1e; border-radius:3px; font-size:0.7rem; font-weight:700; margin-right:3px;">${s}</span>`).join('');
+  const cardSelectedSize = product._selectedSize || 41;
+
+  // Render clickable size chips directly on product cards
+  const sizeChipsInteractive = (product.sizes || [38,39,40,41,42,43,44]).map(s => `
+    <button type="button" class="card-size-btn ${s === cardSelectedSize ? 'active' : ''}" onclick="selectCardSize('${product.id}', ${s}, event)">
+      ${s}
+    </button>
+  `).join('');
 
   return `
     <div class="product-card" data-id="${product.id}">
@@ -170,19 +177,23 @@ function createProductCardHTML(product) {
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
-        <img src="${product.images[0]}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80'">
+        <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" fetchpriority="high">
         <div class="hover-overlay">
           <button class="btn btn-primary" onclick="openProductModal('${product.id}')">VER PRODUCTO →</button>
         </div>
       </div>
-      <div class="product-info" onclick="openProductModal('${product.id}')" style="cursor: pointer;">
-        <span class="product-brand">${product.brand}</span>
-        <h3 class="product-title">${product.name}</h3>
+      <div class="product-info">
+        <span class="product-brand" onclick="openProductModal('${product.id}')" style="cursor: pointer;">${product.brand}</span>
+        <h3 class="product-title" onclick="openProductModal('${product.id}')" style="cursor: pointer;">${product.name}</h3>
         <p class="product-color">${product.color}</p>
         
-        <div style="margin-bottom: 10px;">
-          <span style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 3px; font-weight: 700; text-transform: uppercase;">Tallas Disponibles:</span>
-          <div>${sizeChipsPreview}</div>
+        <div style="margin-top: 4px; margin-bottom: 8px;">
+          <span style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">
+            Talla Seleccionada (EUR): <strong style="color: var(--neon-green);">${cardSelectedSize}</strong>
+          </span>
+          <div class="card-sizes-container">
+            ${sizeChipsInteractive}
+          </div>
         </div>
 
         <div class="product-footer">
@@ -198,6 +209,25 @@ function createProductCardHTML(product) {
       </div>
     </div>
   `;
+}
+
+function selectCardSize(productId, size, event) {
+  if (event) event.stopPropagation();
+  const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
+  if (product) {
+    product._selectedSize = size;
+  }
+
+  // Update card UI instantly
+  document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(card => {
+    card.querySelectorAll('.card-size-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim() === String(size));
+    });
+    const label = card.querySelector('strong');
+    if (label) label.textContent = size;
+  });
+
+  showToast(`Talla ${size} EUR seleccionada`);
 }
 
 function renderNewDrops() {
@@ -228,7 +258,7 @@ function renderCultureSection() {
 
   container.innerHTML = KICKVAULT_CULTURE.map(item => `
     <div class="culture-card">
-      <img src="${item.image}" alt="${item.title}" loading="lazy">
+      <img src="${item.image}" alt="${item.title}" loading="lazy" decoding="async">
       <div class="culture-overlay">
         <span class="badge badge-neon" style="width: fit-content; margin-bottom: 8px;">${item.subtitle}</span>
         <h3 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 8px;">${item.title}</h3>
@@ -303,7 +333,8 @@ function quickAddToCart(productId, event) {
   const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
   if (!product) return;
 
-  addToCart(product, 41, 1);
+  const chosenSize = product._selectedSize || 41;
+  addToCart(product, chosenSize, 1);
 }
 
 function addToCart(product, size, qty = 1) {
@@ -396,7 +427,7 @@ function openProductModal(productId) {
   if (!product) return;
 
   currentSelectedProduct = product;
-  currentSelectedSize = (product.sizes && product.sizes[0]) || 41;
+  currentSelectedSize = product._selectedSize || (product.sizes && product.sizes[0]) || 41;
 
   const modal = document.getElementById('product-modal');
   if (!modal) return;
@@ -461,7 +492,21 @@ function switchModalMainImage(imgUrl, thumbEl) {
 
 function selectModalSize(size, chipEl) {
   currentSelectedSize = size;
+  if (currentSelectedProduct) {
+    currentSelectedProduct._selectedSize = size;
+  }
   updateModalSizeDisplay();
+  
+  // Also update product card size chip if visible
+  if (currentSelectedProduct) {
+    document.querySelectorAll(`.product-card[data-id="${currentSelectedProduct.id}"]`).forEach(card => {
+      card.querySelectorAll('.card-size-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === String(size));
+      });
+      const label = card.querySelector('strong');
+      if (label) label.textContent = size;
+    });
+  }
 }
 
 function addCurrentModalToCart() {
