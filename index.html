@@ -350,7 +350,7 @@
           <h4>SOPORTE</h4>
           <ul class="footer-links">
             <li><a href="#" onclick="openTrackingModal()">Seguimiento de Pedido</a></li>
-            <li><a href="#">Guía de Tallas</a></li>
+            <li><a href="#" onclick="showSizeGuideToast()">Guía de Tallas 📏</a></li>
             <li><a href="#">Políticas de Envío</a></li>
             <li><a href="#">Cambios y Devoluciones</a></li>
           </ul>
@@ -398,7 +398,14 @@
           <p id="modal-color" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">Colorway</p>
           <div id="modal-price" class="product-price" style="font-size: 2.2rem; color: var(--neon-green); margin-bottom: 20px;">$0 COP</div>
 
-          <label style="font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">ELIGE TU TALLA:</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 8px;">
+            <label style="font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">
+              ELIGE TU TALLA: <span id="selected-size-label" style="color: var(--neon-green); font-weight: 800; font-size: 0.95rem;">41 EUR</span>
+            </label>
+            <button type="button" onclick="showSizeGuideToast()" style="font-size: 0.8rem; color: var(--neon-green); text-decoration: underline; background: none; border: none; cursor: pointer;">
+              Guía de tallas 📏
+            </button>
+          </div>
           <div id="modal-size-selector" class="size-selector">
             <!-- Injected -->
           </div>

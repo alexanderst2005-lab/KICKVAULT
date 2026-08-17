@@ -143,6 +143,10 @@ function showToast(message) {
   }, 3200);
 }
 
+function showSizeGuideToast() {
+  showToast("📐 Tabla de Tallas KICKVAULT: 38 (24.5cm) · 39 (25cm) · 40 (25.5cm) · 41 (26.5cm) · 42 (27cm) · 43 (28cm) · 44 (28.5cm)");
+}
+
 /* ==========================================================================
    PRODUCT RENDERING & CARDS
    ========================================================================== */
@@ -155,6 +159,7 @@ function createProductCardHTML(product) {
   }).join('');
 
   const displayPrice = product.formattedPrice || formatCOP(product.price);
+  const sizeChipsPreview = (product.sizes || [38,39,40,41,42,43,44]).map(s => `<span style="display:inline-block; padding: 2px 6px; background:#1e1e1e; border-radius:3px; font-size:0.7rem; font-weight:700; margin-right:3px;">${s}</span>`).join('');
 
   return `
     <div class="product-card" data-id="${product.id}">
@@ -174,6 +179,12 @@ function createProductCardHTML(product) {
         <span class="product-brand">${product.brand}</span>
         <h3 class="product-title">${product.name}</h3>
         <p class="product-color">${product.color}</p>
+        
+        <div style="margin-bottom: 10px;">
+          <span style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 3px; font-weight: 700; text-transform: uppercase;">Tallas Disponibles:</span>
+          <div>${sizeChipsPreview}</div>
+        </div>
+
         <div class="product-footer">
           <span class="product-price">${displayPrice}</span>
           <button class="btn-add-cart-icon" onclick="quickAddToCart('${product.id}', event)" title="Agregar al Carrito">
@@ -311,7 +322,7 @@ function addToCart(product, size, qty = 1) {
   }
 
   saveCart();
-  showToast(`¡${product.name} (Talla ${size}) agregado al carrito! 🛒`);
+  showToast(`¡${product.name} (Talla ${size} EUR) agregado al carrito! 🛒`);
   renderCartDrawer();
   openCartDrawer();
 }
@@ -359,7 +370,7 @@ function renderCartDrawer() {
         <img src="${item.image}" alt="${item.name}" class="cart-item-img">
         <div style="flex-grow: 1;">
           <h4 style="font-size: 0.95rem; margin-bottom: 2px;">${item.name}</h4>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Talla: ${item.size}</p>
+          <p style="font-size: 0.8rem; color: var(--neon-green); font-weight: 700; margin-bottom: 6px;">Talla: ${item.size} EUR</p>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div class="qty-control">
               <button onclick="updateCartQty(${index}, -1)">−</button>
@@ -398,13 +409,8 @@ function openProductModal(productId) {
     `).join('');
   }
 
-  // Render Sizes
-  const sizeContainer = document.getElementById('modal-size-selector');
-  if (sizeContainer) {
-    sizeContainer.innerHTML = (product.sizes || [38,39,40,41,42,43,44]).map(size => `
-      <button class="size-chip ${size === currentSelectedSize ? 'selected' : ''}" onclick="selectModalSize(${size}, this)">${size}</button>
-    `).join('');
-  }
+  // Update Size Selector & Label Display
+  updateModalSizeDisplay();
 
   const mainImg = document.getElementById('modal-main-img');
   if (mainImg) mainImg.src = product.images[0];
@@ -428,6 +434,24 @@ function openProductModal(productId) {
   document.body.style.overflow = 'hidden';
 }
 
+function updateModalSizeDisplay() {
+  if (!currentSelectedProduct) return;
+  
+  const sizeLabelEl = document.getElementById('selected-size-label');
+  if (sizeLabelEl) {
+    sizeLabelEl.textContent = `${currentSelectedSize} EUR`;
+  }
+
+  const sizeContainer = document.getElementById('modal-size-selector');
+  if (sizeContainer) {
+    sizeContainer.innerHTML = (currentSelectedProduct.sizes || [38,39,40,41,42,43,44]).map(size => `
+      <button class="size-chip ${size === currentSelectedSize ? 'selected' : ''}" onclick="selectModalSize(${size}, this)">
+        ${size}
+      </button>
+    `).join('');
+  }
+}
+
 function switchModalMainImage(imgUrl, thumbEl) {
   const mainImg = document.getElementById('modal-main-img');
   if (mainImg) mainImg.src = imgUrl;
@@ -437,8 +461,7 @@ function switchModalMainImage(imgUrl, thumbEl) {
 
 function selectModalSize(size, chipEl) {
   currentSelectedSize = size;
-  document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
-  if (chipEl) chipEl.classList.add('selected');
+  updateModalSizeDisplay();
 }
 
 function addCurrentModalToCart() {
