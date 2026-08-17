@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KICKVAULT | Tu Estilo. Tu Zapatilla. Tu Momento.</title>
+  <meta name="description" content="KICKVAULT es la tienda de zapatillas urbanas y lanzamientos exclusivos número uno. Descubre los modelos más buscados y encuentra tu estilo único.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    ⚡ <span>DROP EXCLUSIVO DISPONIBLE</span> — ENVÍOS GRATIS A TODO EL PAÍS EN COMPRAS SUPERIORES A $200.000
+  </div>
+
+  <!-- Main Header Navigation -->
+  <header class="main-header">
+    <div class="container">
+      <div class="header-content">
+        <!-- Logo -->
+        <a href="#" class="logo">
+          KICK<span>VAULT</span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav>
+          <ul class="nav-links">
+            <li><a href="#hero" class="nav-link active">Tienda</a></li>
+            <li><a href="#lanzamientos" class="nav-link">Nuevos Lanzamientos</a></li>
+            <li><a href="#drop-exclusivo" class="nav-link">Colecciones</a></li>
+            <li><a href="#quiz" class="nav-link">Encuentra tu Zapatilla</a></li>
+            <li><a href="#cultura" class="nav-link">Cultura</a></li>
+          </ul>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <button class="action-btn" onclick="openSearchModal()" title="Buscar zapatillas">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          
+          <button class="action-btn hide-mobile" onclick="openTrackingModal()" title="Seguimiento de pedido">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+          </button>
+
+          <button class="action-btn" onclick="openFavoritesDrawer()" title="Mis Favoritos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="badge-counter fav-count" style="display:none;">0</span>
+          </button>
+
+          <button class="action-btn" onclick="openCartDrawer()" title="Carrito de Compras">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-counter cart-count" style="display:none;">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Sticky Navigation -->
+  <nav class="mobile-bottom-nav">
+    <a href="#hero" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      </svg>
+      <span>Inicio</span>
+    </a>
+    <button class="mobile-nav-item" onclick="openSearchModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span>Buscar</span>
+    </button>
+    <button class="mobile-nav-item" onclick="openFavoritesDrawer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+      <span>Favoritas</span>
+    </button>
+    <button class="mobile-nav-item" onclick="openCartDrawer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span>Carrito</span>
+    </button>
+    <button class="mobile-nav-item" onclick="openTrackingModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="3" width="15" height="13"></rect>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+      </svg>
+      <span>Pedidos</span>
+    </button>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section id="hero" class="hero-section">
+    <div class="hero-bg-glow"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <span class="badge badge-neon hero-tag">Lanzamiento Oficial</span>
+          <h1 class="hero-title">
+            LAS ZAPATILLAS<br>
+            QUE MARCAN<br>
+            <span>TU ESTILO.</span>
+          </h1>
+          <p class="hero-subtitle">
+            Descubre modelos exclusivos, lanzamientos y las zapatillas que están marcando tendencia en la cultura urbana mundial.
+          </p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" onclick="scrollToSection('lanzamientos')">COMPRAR AHORA</button>
+            <button class="btn btn-secondary" onclick="scrollToSection('drop-exclusivo')">VER COLECCIÓN</button>
+          </div>
+        </div>
+
+        <div class="hero-media">
+          <div class="hero-image-wrapper">
+            <img src="images/hero_sneaker.png" alt="Zapatilla Protagonista KICKVAULT Air Max Urban X">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUEVOS LANZAMIENTOS -->
+  <section id="lanzamientos" class="section-padding bg-dark-alt">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">NUEVOS LANZAMIENTOS</h2>
+          <p class="section-subtitle">Lo último acaba de llegar a nuestro Vault.</p>
+        </div>
+      </div>
+      
+      <div id="new-drops-grid" class="product-grid">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- COLECCIÓN EXCLUSIVA (DROP LIMITADO) -->
+  <section id="drop-exclusivo" class="section-padding drop-section">
+    <div class="container">
+      <div class="drop-card">
+        <div class="drop-media">
+          <img src="images/drop_exclusive.png" alt="Cyber Force High Edición Limitada">
+        </div>
+        
+        <div class="drop-details">
+          <span class="badge badge-neon" style="width: fit-content;">DROP EDICIÓN LIMITADA</span>
+          <h2 class="section-title" style="font-size: 3rem;">CYBER FORCE HIGH ED. 01</h2>
+          <p style="color: var(--text-muted); font-size: 1.05rem;">
+            No todos podrán tenerlas. Diseñadas en polímero cibernético con detalles neón reactivos a luz UV y número de serie grabado.
+          </p>
+
+          <!-- Timer -->
+          <div>
+            <span style="font-size: 0.8rem; color: var(--neon-green); font-weight: 700; letter-spacing: 1px;">EL TIEMPO SE AGOTA EN:</span>
+            <div class="timer-box">
+              <div class="timer-segment">
+                <div id="timer-hours" class="timer-val">03</div>
+                <div class="timer-lbl">HORAS</div>
+              </div>
+              <div class="timer-segment">
+                <div id="timer-mins" class="timer-val">18</div>
+                <div class="timer-lbl">MINUTOS</div>
+              </div>
+              <div class="timer-segment">
+                <div id="timer-secs" class="timer-val">42</div>
+                <div class="timer-lbl">SEGUNDOS</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stock Meter -->
+          <div class="stock-meter">
+            <div class="stock-info">
+              <span>UNIDADES DISPONIBLES:</span>
+              <span style="color: var(--neon-green);">34 / 500 UNIDADES</span>
+            </div>
+            <div class="stock-bar-track">
+              <div class="stock-bar-fill"></div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="openProductModal('kv-02')" style="font-size: 1.1rem; padding: 18px 36px;">
+            QUIERO LAS MÍAS 🔥
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPRA POR ESTILO -->
+  <section id="estilos" class="section-padding">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">ENCUENTRA TU ESTILO</h2>
+          <p class="section-subtitle">Filtra por la actitud que quieres proyectar.</p>
+        </div>
+      </div>
+
+      <div class="style-grid">
+        <!-- Urbano -->
+        <div class="style-card" onclick="openSearchModal(); performSearch('urbano');">
+          <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80" alt="Estilo Urbano">
+          <div class="style-card-overlay"></div>
+          <div class="style-card-content">
+            <h3 class="style-card-title">URBANO</h3>
+            <p class="style-card-desc">Zapatillas para destacar en la calle.</p>
+          </div>
+        </div>
+
+        <!-- Deportivo -->
+        <div class="style-card" onclick="openSearchModal(); performSearch('deportivo');">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" alt="Estilo Deportivo">
+          <div class="style-card-overlay"></div>
+          <div class="style-card-content">
+            <h3 class="style-card-title">DEPORTIVO</h3>
+            <p class="style-card-desc">Rendimiento, tecnología y comodidad.</p>
+          </div>
+        </div>
+
+        <!-- Casual -->
+        <div class="style-card" onclick="openSearchModal(); performSearch('casual');">
+          <img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=800&q=80" alt="Estilo Casual">
+          <div class="style-card-overlay"></div>
+          <div class="style-card-content">
+            <h3 class="style-card-title">CASUAL</h3>
+            <p class="style-card-desc">Para todos los días con toque premium.</p>
+          </div>
+        </div>
+
+        <!-- Exclusivo -->
+        <div class="style-card" onclick="openSearchModal(); performSearch('exclusivo');">
+          <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80" alt="Estilo Exclusivo">
+          <div class="style-card-overlay"></div>
+          <div class="style-card-content">
+            <h3 class="style-card-title">EXCLUSIVO</h3>
+            <p class="style-card-desc">Modelos que no encuentras en cualquier lugar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENCUENTRA TU ZAPATILLA (QUIZ) -->
+  <section id="quiz" class="section-padding bg-dark-alt">
+    <div class="container">
+      <div class="section-header center">
+        <span class="badge badge-neon" style="margin-bottom: 12px;">TEST INTERACTIVO</span>
+        <h2 class="section-title">¿NO SABES CUÁL ELEGIR?</h2>
+        <p class="section-subtitle">Responde 3 preguntas y encontraremos tu combinación perfecta.</p>
+      </div>
+
+      <div class="quiz-container">
+        <!-- Progress Bar Dots -->
+        <div class="quiz-steps">
+          <div id="quiz-dot-1" class="quiz-step-dot active">01</div>
+          <div id="quiz-dot-2" class="quiz-step-dot">02</div>
+          <div id="quiz-dot-3" class="quiz-step-dot">03</div>
+        </div>
+
+        <!-- Dynamic Content -->
+        <div id="quiz-step-content">
+          <!-- Injected via app.js -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÁS BUSCADAS (TRENDING CAROUSEL) -->
+  <section id="mas-buscadas" class="section-padding">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">LAS MÁS BUSCADAS</h2>
+          <p class="section-subtitle">Estas son las siluetas que todos quieren esta temporada.</p>
+        </div>
+      </div>
+
+      <div id="trending-carousel" class="horizontal-scroll-container">
+        <!-- Injected via app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CULTURA KICKVAULT -->
+  <section id="cultura" class="section-padding bg-dark-alt">
+    <div class="container">
+      <div class="section-header center" style="margin-bottom: 50px;">
+        <span class="badge badge-outline" style="margin-bottom: 12px;">MANIFIESTO</span>
+        <h2 class="section-title" style="max-width: 800px; margin: 0 auto 16px auto;">
+          LAS ZAPATILLAS SON PARTE DE TU ESTILO.
+        </h2>
+        <p class="section-subtitle" style="max-width: 600px; margin: 0 auto;">
+          No se trata solamente de lo que llevas en los pies. Se trata de cómo quieres verte y actuar en la ciudad.
+        </p>
+      </div>
+
+      <div id="culture-grid" class="culture-grid">
+        <!-- Injected via app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">KICK<span>VAULT</span></a>
+          <p>
+            KICKVAULT no vende solamente zapatillas. Vende estilo. Diseñado para quienes exigen exclusividad, actitud y rendimiento en cada paso.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>NAVEGACIÓN</h4>
+          <ul class="footer-links">
+            <li><a href="#hero">Inicio</a></li>
+            <li><a href="#lanzamientos">Nuevos Lanzamientos</a></li>
+            <li><a href="#drop-exclusivo">Colecciones Exclusivas</a></li>
+            <li><a href="#quiz">Encuentra tu Zapatilla</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>SOPORTE</h4>
+          <ul class="footer-links">
+            <li><a href="#" onclick="openTrackingModal()">Seguimiento de Pedido</a></li>
+            <li><a href="#">Guía de Tallas</a></li>
+            <li><a href="#">Políticas de Envío</a></li>
+            <li><a href="#">Cambios y Devoluciones</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>SÍGUENOS</h4>
+          <ul class="footer-links">
+            <li><a href="#">Instagram @kickvault</a></li>
+            <li><a href="#">TikTok @kickvault_official</a></li>
+            <li><a href="#">YouTube / KickVaultTV</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 KICKVAULT Inc. Todos los derechos reservados.</p>
+        <p>TU ESTILO. TU ZAPATILLA. TU MOMENTO.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       MODALS & DRAWERS
+       ========================================================================== -->
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="product-modal" class="modal-overlay">
+    <div class="modal-container">
+      <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+
+      <div class="product-modal-grid">
+        <div>
+          <div class="modal-gallery-main">
+            <img id="modal-main-img" src="" alt="Zapatilla Vista Principal">
+          </div>
+          <div id="modal-thumbs" class="modal-thumbnails">
+            <!-- Injected -->
+          </div>
+        </div>
+
+        <div>
+          <span id="modal-brand" class="product-brand">KICKVAULT</span>
+          <h2 id="modal-title" class="section-title" style="font-size: 2.2rem; margin-bottom: 8px;">Zapatilla</h2>
+          <p id="modal-color" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">Colorway</p>
+          <div id="modal-price" class="product-price" style="font-size: 2.2rem; color: var(--neon-green); margin-bottom: 20px;">$0</div>
+
+          <label style="font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">ELIGE TU TALLA:</label>
+          <div id="modal-size-selector" class="size-selector">
+            <!-- Injected -->
+          </div>
+
+          <p id="modal-desc" style="color: #bbb; font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px;"></p>
+
+          <button class="btn btn-primary btn-block" onclick="addCurrentModalToCart()" style="font-size: 1.1rem; padding: 18px;">
+            AGREGAR AL CARRITO +
+          </button>
+
+          <div class="value-props">
+            <span>🚚 Envíos rápidos</span>
+            <span>↩️ Cambios fáciles</span>
+            <span>🔒 Compra segura</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div id="cart-drawer-overlay" class="drawer-overlay">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <h3>TU CARRITO DE COMPRAS</h3>
+        <button class="modal-close-btn" onclick="closeCartDrawer()">✕</button>
+      </div>
+
+      <div id="cart-items-container" class="drawer-body">
+        <!-- Injected -->
+      </div>
+
+      <div class="drawer-footer">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Subtotal:</span>
+          <span id="cart-subtotal" style="font-weight: 700;">$0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 1.2rem; font-weight: 800; color: var(--neon-green);">
+          <span>Total:</span>
+          <span id="cart-total">$0</span>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="processCheckout()">FINALIZAR COMPRA 🛒</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVORITES DRAWER -->
+  <div id="fav-drawer-overlay" class="drawer-overlay">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <h3>TUS FAVORITAS</h3>
+        <button class="modal-close-btn" onclick="closeFavoritesDrawer()">✕</button>
+      </div>
+
+      <div id="fav-items-container" class="drawer-body">
+        <!-- Injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH MODAL OVERLAY -->
+  <div id="search-modal" class="modal-overlay">
+    <div class="modal-container search-modal-container">
+      <button class="modal-close-btn" onclick="closeSearchModal()">✕</button>
+
+      <h2 class="section-title" style="margin-bottom: 20px;">¿QUÉ ESTÁS BUSCANDO?</h2>
+
+      <div class="search-input-wrapper">
+        <input type="text" id="search-input" class="search-input-field" placeholder="Buscar por modelo, marca, color (ej. Air Max, Cyber, Negro)..." autofocus>
+      </div>
+
+      <div class="search-filter-pills">
+        <span class="filter-pill active" onclick="performSearch('')">Todas</span>
+        <span class="filter-pill" onclick="performSearch('air max')">Air Max</span>
+        <span class="filter-pill" onclick="performSearch('verde')">Verde Neón</span>
+        <span class="filter-pill" onclick="performSearch('exclusivo')">Exclusivas</span>
+        <span class="filter-pill" onclick="performSearch('negro')">Triple Black</span>
+      </div>
+
+      <div id="search-results-grid" class="product-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <!-- Injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER TRACKING MODAL -->
+  <div id="tracking-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 650px;">
+      <button class="modal-close-btn" onclick="closeTrackingModal()">✕</button>
+
+      <h2 class="section-title" style="margin-bottom: 12px;">SIGUE TU PEDIDO</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+        Ingresa tu número de guía o pedido para rastrear la ubicación en tiempo real. Prueba con <strong>KV-1048</strong> o <strong>KV-2090</strong>.
+      </p>
+
+      <div style="display: flex; gap: 12px;">
+        <input type="text" id="tracking-input" class="search-input-field" placeholder="Ejemplo: KV-1048" value="KV-1048" style="font-weight: 700; text-transform: uppercase;">
+        <button class="btn btn-primary" onclick="searchOrderTracking()">RASTREAR</button>
+      </div>
+
+      <div id="tracking-result-box">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
