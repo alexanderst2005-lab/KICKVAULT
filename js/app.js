@@ -148,89 +148,47 @@ function showSizeGuideToast() {
 }
 
 /* ==========================================================================
-   PRODUCT RENDERING & CARDS WITH DIRECT CLICKABLE MEDIA & SIZE SELECTOR
+   CLEAN LUXURY PRODUCT CARDS (TAP TO OPEN MODAL & SELECT SIZE)
    ========================================================================== */
 function createProductCardHTML(product) {
   if (!product) return '';
   const isFav = favorites.has(product.id);
   const badgesHTML = (product.badges || []).map(b => {
-    const isNeon = b.includes("EDICIÓN") || b.includes("NUEV") || b.includes("EXCLUSIVO");
+    const isNeon = b.includes("EDICIÓN") || b.includes("NUEV") || b.includes("EXCLUSIVO") || b.includes("TENDENCIA");
     return `<span class="badge ${isNeon ? 'badge-neon' : ''}">${b}</span>`;
   }).join('');
 
   const displayPrice = product.formattedPrice || formatCOP(product.price);
-  const cardSelectedSize = product._selectedSize || 41;
-
-  // Render clickable size chips directly on product cards
-  const sizeChipsInteractive = (product.sizes || [38,39,40,41,42,43,44]).map(s => `
-    <button type="button" class="card-size-btn ${s === cardSelectedSize ? 'active' : ''}" onclick="selectCardSize('${product.id}', ${s}, event)">
-      ${s}
-    </button>
-  `).join('');
 
   return `
-    <div class="product-card" data-id="${product.id}">
-      <div class="product-media" onclick="openProductModal('${product.id}')" style="cursor: pointer;">
+    <div class="product-card" data-id="${product.id}" onclick="openProductModal('${product.id}')" style="cursor: pointer;">
+      <div class="product-media">
         <div class="card-badges">${badgesHTML}</div>
-        <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite('${product.id}', event)" title="Favorito">
+        <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite('${product.id}', event)" title="Guardar en favoritos">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? '#ff2a5f' : 'none'}" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
         <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" fetchpriority="high">
         <div class="hover-overlay">
-          <button class="btn btn-primary" onclick="openProductModal('${product.id}')">VER PRODUCTO →</button>
+          <button class="btn btn-primary" onclick="openProductModal('${product.id}'); event.stopPropagation();">VER MODELO →</button>
         </div>
       </div>
+
       <div class="product-info">
-        <span class="product-brand" onclick="openProductModal('${product.id}')" style="cursor: pointer;">${product.brand}</span>
-        <h3 class="product-title" onclick="openProductModal('${product.id}')" style="cursor: pointer;">${product.name}</h3>
+        <span class="product-brand">${product.brand}</span>
+        <h3 class="product-title">${product.name}</h3>
         <p class="product-color">${product.color}</p>
         
-        <div style="margin-top: 4px; margin-bottom: 8px;">
-          <span style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">
-            Talla Seleccionada (EUR): <strong style="color: var(--neon-green);">${cardSelectedSize}</strong>
-          </span>
-          <div class="card-sizes-container">
-            ${sizeChipsInteractive}
-          </div>
-        </div>
-
         <div class="product-footer">
           <span class="product-price">${displayPrice}</span>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.72rem;" onclick="openProductModal('${product.id}')">VER 👁️</button>
-            <button class="btn-add-cart-icon" onclick="quickAddToCart('${product.id}', event)" title="Agregar al Carrito">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="9" cy="21" r="1"></circle>
-                <circle cx="20" cy="21" r="1"></circle>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-              </svg>
-            </button>
-          </div>
+          <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; font-weight: 700;" onclick="openProductModal('${product.id}'); event.stopPropagation();">
+            VER TALLAS →
+          </button>
         </div>
       </div>
     </div>
   `;
-}
-
-function selectCardSize(productId, size, event) {
-  if (event) event.stopPropagation();
-  const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
-  if (product) {
-    product._selectedSize = size;
-  }
-
-  // Update card UI instantly
-  document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(card => {
-    card.querySelectorAll('.card-size-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.textContent.trim() === String(size));
-    });
-    const label = card.querySelector('strong');
-    if (label) label.textContent = size;
-  });
-
-  showToast(`Talla ${size} EUR seleccionada`);
 }
 
 function renderNewDrops() {
@@ -320,7 +278,7 @@ function renderFavoritesDrawer() {
         <h4 style="font-size: 0.95rem; margin-bottom: 4px;">${product.name}</h4>
         <p style="color: var(--neon-green); font-weight: 700; font-size: 0.9rem;">${formatCOP(product.price)}</p>
         <div style="display: flex; gap: 10px; margin-top: 8px;">
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="quickAddToCart('${product.id}')">AGREGAR</button>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="openProductModal('${product.id}'); closeFavoritesDrawer();">VER TALLAS</button>
           <button style="color: #ff4444; font-size: 0.75rem; text-decoration: underline;" onclick="toggleFavorite('${product.id}')">Eliminar</button>
         </div>
       </div>
@@ -331,15 +289,6 @@ function renderFavoritesDrawer() {
 /* ==========================================================================
    CART MANAGEMENT
    ========================================================================== */
-function quickAddToCart(productId, event) {
-  if (event) event.stopPropagation();
-  const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
-  if (!product) return;
-
-  const chosenSize = product._selectedSize || 41;
-  addToCart(product, chosenSize, 1);
-}
-
 function addToCart(product, size, qty = 1) {
   const existingIndex = cart.findIndex(item => item.productId === product.id && item.size === size);
   if (existingIndex > -1) {
@@ -423,7 +372,7 @@ function renderCartDrawer() {
 }
 
 /* ==========================================================================
-   PRODUCT DETAIL MODAL
+   PRODUCT DETAIL MODAL (PROMINENT SIZE SELECTION)
    ========================================================================== */
 function openProductModal(productId) {
   const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
@@ -499,17 +448,6 @@ function selectModalSize(size, chipEl) {
     currentSelectedProduct._selectedSize = size;
   }
   updateModalSizeDisplay();
-  
-  // Also update product card size chip if visible
-  if (currentSelectedProduct) {
-    document.querySelectorAll(`.product-card[data-id="${currentSelectedProduct.id}"]`).forEach(card => {
-      card.querySelectorAll('.card-size-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.trim() === String(size));
-      });
-      const label = card.querySelector('strong');
-      if (label) label.textContent = size;
-    });
-  }
 }
 
 function addCurrentModalToCart() {
