@@ -1,12 +1,37 @@
-// KICKVAULT - Application Logic & State Management
+// KICKVAULT - Lógica de Aplicación, Persistencia Robusta y Gestión de Estado
 
 // Local Storage Keys
 const CART_STORAGE_KEY = 'kickvault_cart_v1';
 const FAV_STORAGE_KEY = 'kickvault_favs_v1';
 
-// Global Application State
-let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
-let favorites = new Set(JSON.parse(localStorage.getItem(FAV_STORAGE_KEY)) || []);
+// Safe Local Storage Loaders to prevent any initialization black screen crashes
+function loadCartFromStorage() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.warn("KICKVAULT: Error al leer el carrito de localStorage, reiniciando:", e);
+    return [];
+  }
+}
+
+function loadFavsFromStorage() {
+  try {
+    const raw = localStorage.getItem(FAV_STORAGE_KEY);
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch (e) {
+    console.warn("KICKVAULT: Error al leer favoritos de localStorage, reiniciando:", e);
+    return new Set();
+  }
+}
+
+// Global State
+let cart = loadCartFromStorage();
+let favorites = loadFavsFromStorage();
 
 // Quiz State
 let quizCurrentStep = 1;
@@ -16,32 +41,63 @@ let quizAnswers = {
   color: null
 };
 
-// Selected Product State for Modal
+// Modal Selected Product State
 let currentSelectedProduct = null;
 let currentSelectedSize = 41;
 
-// Initialize App on DOM Ready
+// Currency Formatter: $699.900 COP
+function formatCOP(amount) {
+  if (typeof amount !== 'number' || isNaN(amount)) return '$0 COP';
+  return `$${amount.toLocaleString('es-CO')} COP`;
+}
+
+// App Initialization with Defensive Error Handlers
 document.addEventListener('DOMContentLoaded', () => {
-  initCountdowns();
-  renderNewDrops();
-  renderTrending();
-  renderCultureSection();
-  updateHeaderCounters();
-  setupQuiz();
-  setupSearch();
-  setupOrderTracking();
+  // Ensure body scroll is unlocked on reload
+  document.body.style.overflow = '';
+  document.body.style.display = 'block';
+
+  // Ensure modals/drawers are closed on fresh reload
+  document.querySelectorAll('.modal-overlay, .drawer-overlay').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  // Safe Section Initializations
+  runSafely(initCountdowns, "Contador de Lanzamiento");
+  runSafely(renderNewDrops, "Nuevos Lanzamientos");
+  runSafely(renderTrending, "Más Buscadas");
+  runSafely(renderCultureSection, "Sección Cultura");
+  runSafely(updateHeaderCounters, "Contadores del Encabezado");
+  runSafely(setupQuiz, "Test Encuentra tu Zapatilla");
+  runSafely(setupSearch, "Buscador");
 });
 
+function runSafely(fn, label) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`KICKVAULT: Error en ${label}:`, err);
+  }
+}
+
 /* ==========================================================================
-   STATE PERSISTENCE & HEADER COUNTERS
+   STATE PERSISTENCE & HEADERS
    ========================================================================== */
 function saveCart() {
-  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  } catch (e) {
+    console.error("Error guardando carrito en localStorage:", e);
+  }
   updateHeaderCounters();
 }
 
 function saveFavorites() {
-  localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
+  try {
+    localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
+  } catch (e) {
+    console.error("Error guardando favoritos en localStorage:", e);
+  }
   updateHeaderCounters();
 }
 
@@ -49,7 +105,7 @@ function updateHeaderCounters() {
   const cartCounters = document.querySelectorAll('.cart-count');
   const favCounters = document.querySelectorAll('.fav-count');
 
-  const totalCartItems = cart.reduce((acc, item) => acc + item.qty, 0);
+  const totalCartItems = cart.reduce((acc, item) => acc + (item.qty || 1), 0);
   const totalFavItems = favorites.size;
 
   cartCounters.forEach(el => {
@@ -91,11 +147,14 @@ function showToast(message) {
    PRODUCT RENDERING & CARDS
    ========================================================================== */
 function createProductCardHTML(product) {
+  if (!product) return '';
   const isFav = favorites.has(product.id);
-  const badgesHTML = product.badges.map(b => {
+  const badgesHTML = (product.badges || []).map(b => {
     const isNeon = b.includes("EDICIÓN") || b.includes("NUEV") || b.includes("EXCLUSIVO");
     return `<span class="badge ${isNeon ? 'badge-neon' : ''}">${b}</span>`;
   }).join('');
+
+  const displayPrice = product.formattedPrice || formatCOP(product.price);
 
   return `
     <div class="product-card" data-id="${product.id}">
@@ -106,7 +165,7 @@ function createProductCardHTML(product) {
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
-        <img src="${product.images[0]}" alt="${product.name}" loading="lazy">
+        <img src="${product.images[0]}" alt="${product.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80'">
         <div class="hover-overlay">
           <button class="btn btn-primary" onclick="openProductModal('${product.id}')">VER PRODUCTO →</button>
         </div>
@@ -116,7 +175,7 @@ function createProductCardHTML(product) {
         <h3 class="product-title">${product.name}</h3>
         <p class="product-color">${product.color}</p>
         <div class="product-footer">
-          <span class="product-price">${product.formattedPrice}</span>
+          <span class="product-price">${displayPrice}</span>
           <button class="btn-add-cart-icon" onclick="quickAddToCart('${product.id}', event)" title="Agregar al Carrito">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="9" cy="21" r="1"></circle>
@@ -133,6 +192,11 @@ function createProductCardHTML(product) {
 function renderNewDrops() {
   const container = document.getElementById('new-drops-grid');
   if (!container) return;
+  if (typeof KICKVAULT_PRODUCTS === 'undefined' || !Array.isArray(KICKVAULT_PRODUCTS)) {
+    container.innerHTML = `<p style="color: var(--text-muted); padding: 20px;">Cargando catálogo KICKVAULT...</p>`;
+    return;
+  }
+
   const newProducts = KICKVAULT_PRODUCTS.filter(p => p.isNew || p.id === 'kv-01' || p.id === 'kv-03' || p.id === 'kv-05' || p.id === 'kv-06');
   container.innerHTML = newProducts.map(p => createProductCardHTML(p)).join('');
 }
@@ -140,6 +204,8 @@ function renderNewDrops() {
 function renderTrending() {
   const container = document.getElementById('trending-carousel');
   if (!container) return;
+  if (typeof KICKVAULT_PRODUCTS === 'undefined' || !Array.isArray(KICKVAULT_PRODUCTS)) return;
+
   const trendingProducts = KICKVAULT_PRODUCTS.filter(p => p.isTrending || p.rating >= 4.8);
   container.innerHTML = trendingProducts.map(p => createProductCardHTML(p)).join('');
 }
@@ -147,9 +213,11 @@ function renderTrending() {
 function renderCultureSection() {
   const container = document.getElementById('culture-grid');
   if (!container) return;
+  if (typeof KICKVAULT_CULTURE === 'undefined') return;
+
   container.innerHTML = KICKVAULT_CULTURE.map(item => `
     <div class="culture-card">
-      <img src="${item.image}" alt="${item.title}">
+      <img src="${item.image}" alt="${item.title}" loading="lazy">
       <div class="culture-overlay">
         <span class="badge badge-neon" style="width: fit-content; margin-bottom: 8px;">${item.subtitle}</span>
         <h3 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 8px;">${item.title}</h3>
@@ -160,7 +228,7 @@ function renderCultureSection() {
 }
 
 /* ==========================================================================
-   FAVORITES MANAGMENT
+   FAVORITES MANAGEMENT
    ========================================================================== */
 function toggleFavorite(productId, event) {
   if (event) event.stopPropagation();
@@ -173,7 +241,7 @@ function toggleFavorite(productId, event) {
   }
   saveFavorites();
   
-  // Refresh card icons
+  // Refresh card fav icons
   document.querySelectorAll(`.product-card[data-id="${productId}"] .btn-fav`).forEach(btn => {
     const active = favorites.has(productId);
     btn.classList.toggle('active', active);
@@ -206,7 +274,7 @@ function renderFavoritesDrawer() {
       <img src="${product.images[0]}" alt="${product.name}" class="cart-item-img">
       <div style="flex-grow: 1;">
         <h4 style="font-size: 0.95rem; margin-bottom: 4px;">${product.name}</h4>
-        <p style="color: var(--neon-green); font-weight: 700; font-size: 0.9rem;">${product.formattedPrice}</p>
+        <p style="color: var(--neon-green); font-weight: 700; font-size: 0.9rem;">${formatCOP(product.price)}</p>
         <div style="display: flex; gap: 10px; margin-top: 8px;">
           <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="quickAddToCart('${product.id}')">AGREGAR</button>
           <button style="color: #ff4444; font-size: 0.75rem; text-decoration: underline;" onclick="toggleFavorite('${product.id}')">Eliminar</button>
@@ -236,7 +304,6 @@ function addToCart(product, size, qty = 1) {
       productId: product.id,
       name: product.name,
       price: product.price,
-      formattedPrice: product.formattedPrice,
       image: product.images[0],
       size: size,
       qty: qty
@@ -278,14 +345,14 @@ function renderCartDrawer() {
         <button class="btn btn-primary" onclick="closeCartDrawer(); scrollToSection('lanzamientos');">DESCUBRIR ZAPATILLAS</button>
       </div>
     `;
-    if (subtotalEl) subtotalEl.textContent = '$0';
-    if (totalEl) totalEl.textContent = '$0';
+    if (subtotalEl) subtotalEl.textContent = formatCOP(0);
+    if (totalEl) totalEl.textContent = formatCOP(0);
     return;
   }
 
   let subtotal = 0;
   container.innerHTML = cart.map((item, index) => {
-    const itemTotal = item.price * item.qty;
+    const itemTotal = (item.price || 0) * (item.qty || 1);
     subtotal += itemTotal;
     return `
       <div class="cart-item">
@@ -299,15 +366,15 @@ function renderCartDrawer() {
               <span style="font-weight: 700; font-size: 0.9rem;">${item.qty}</span>
               <button onclick="updateCartQty(${index}, 1)">+</button>
             </div>
-            <span style="font-weight: 700; color: var(--neon-green); font-size: 0.95rem;">$${itemTotal.toLocaleString('es-CO')}</span>
+            <span style="font-weight: 700; color: var(--neon-green); font-size: 0.95rem;">${formatCOP(itemTotal)}</span>
           </div>
         </div>
       </div>
     `;
   }).join('');
 
-  if (subtotalEl) subtotalEl.textContent = `$${subtotal.toLocaleString('es-CO')}`;
-  if (totalEl) totalEl.textContent = `$${subtotal.toLocaleString('es-CO')}`;
+  if (subtotalEl) subtotalEl.textContent = formatCOP(subtotal);
+  if (totalEl) totalEl.textContent = formatCOP(subtotal);
 }
 
 /* ==========================================================================
@@ -318,44 +385,60 @@ function openProductModal(productId) {
   if (!product) return;
 
   currentSelectedProduct = product;
-  currentSelectedSize = product.sizes[0] || 41;
+  currentSelectedSize = (product.sizes && product.sizes[0]) || 41;
 
   const modal = document.getElementById('product-modal');
   if (!modal) return;
 
   // Render Thumbnails
   const thumbsContainer = document.getElementById('modal-thumbs');
-  thumbsContainer.innerHTML = product.images.map((img, idx) => `
-    <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" onclick="switchModalMainImage('${img}', this)" alt="Vista ${idx + 1}">
-  `).join('');
+  if (thumbsContainer) {
+    thumbsContainer.innerHTML = (product.images || []).map((img, idx) => `
+      <img src="${img}" class="thumb-img ${idx === 0 ? 'active' : ''}" onclick="switchModalMainImage('${img}', this)" alt="Vista ${idx + 1}">
+    `).join('');
+  }
 
   // Render Sizes
   const sizeContainer = document.getElementById('modal-size-selector');
-  sizeContainer.innerHTML = product.sizes.map(size => `
-    <button class="size-chip ${size === currentSelectedSize ? 'selected' : ''}" onclick="selectModalSize(${size}, this)">${size}</button>
-  `).join('');
+  if (sizeContainer) {
+    sizeContainer.innerHTML = (product.sizes || [38,39,40,41,42,43,44]).map(size => `
+      <button class="size-chip ${size === currentSelectedSize ? 'selected' : ''}" onclick="selectModalSize(${size}, this)">${size}</button>
+    `).join('');
+  }
 
-  document.getElementById('modal-main-img').src = product.images[0];
-  document.getElementById('modal-brand').textContent = product.brand;
-  document.getElementById('modal-title').textContent = product.name;
-  document.getElementById('modal-price').textContent = product.formattedPrice;
-  document.getElementById('modal-color').textContent = product.color;
-  document.getElementById('modal-desc').textContent = product.description;
+  const mainImg = document.getElementById('modal-main-img');
+  if (mainImg) mainImg.src = product.images[0];
+  
+  const brandEl = document.getElementById('modal-brand');
+  if (brandEl) brandEl.textContent = product.brand;
+
+  const titleEl = document.getElementById('modal-title');
+  if (titleEl) titleEl.textContent = product.name;
+
+  const priceEl = document.getElementById('modal-price');
+  if (priceEl) priceEl.textContent = formatCOP(product.price);
+
+  const colorEl = document.getElementById('modal-color');
+  if (colorEl) colorEl.textContent = product.color;
+
+  const descEl = document.getElementById('modal-desc');
+  if (descEl) descEl.textContent = product.description;
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
 function switchModalMainImage(imgUrl, thumbEl) {
-  document.getElementById('modal-main-img').src = imgUrl;
+  const mainImg = document.getElementById('modal-main-img');
+  if (mainImg) mainImg.src = imgUrl;
   document.querySelectorAll('.thumb-img').forEach(el => el.classList.remove('active'));
-  thumbEl.classList.add('active');
+  if (thumbEl) thumbEl.classList.add('active');
 }
 
 function selectModalSize(size, chipEl) {
   currentSelectedSize = size;
   document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
-  chipEl.classList.add('selected');
+  if (chipEl) chipEl.classList.add('selected');
 }
 
 function addCurrentModalToCart() {
@@ -408,7 +491,7 @@ function initCountdowns() {
   const timerMins = document.getElementById('timer-mins');
   const timerSecs = document.getElementById('timer-secs');
 
-  if (!timerHours) return;
+  if (!timerHours || !timerMins || !timerSecs) return;
 
   setInterval(() => {
     if (seconds > 0) seconds--;
@@ -442,10 +525,10 @@ const QUIZ_QUESTIONS = [
     title: "02 — ¿CUÁL ES TU PRESUPUESTO?",
     field: "budget",
     options: [
-      { label: "Hasta $500.000", max: 500000 },
-      { label: "$500.000 - $700.000", min: 500000, max: 700000 },
-      { label: "$700.000 - $850.000", min: 700000, max: 850000 },
-      { label: "Más de $850.000", min: 850000 }
+      { label: "Hasta $500.000 COP", max: 500000 },
+      { label: "$500.000 - $700.000 COP", min: 500000, max: 700000 },
+      { label: "$700.000 - $850.000 COP", min: 700000, max: 850000 },
+      { label: "Más de $850.000 COP", min: 850000 }
     ]
   },
   {
@@ -473,7 +556,6 @@ function renderQuizStep() {
 
   if (!container) return;
 
-  // Dots active status
   [dot1, dot2, dot3].forEach((dot, idx) => {
     if (dot) {
       dot.classList.toggle('active', idx + 1 === quizCurrentStep);
@@ -492,7 +574,7 @@ function renderQuizStep() {
   container.innerHTML = `
     <h3 class="quiz-question-title">${q.title}</h3>
     <div class="quiz-options-grid">
-      ${q.options.map((opt, i) => {
+      ${q.options.map((opt) => {
         const isSelected = currentValue === (opt.val || opt.label);
         return `
           <button class="quiz-opt-btn ${isSelected ? 'selected' : ''}" onclick="selectQuizOption('${q.field}', '${opt.val || opt.label}')">
@@ -533,8 +615,7 @@ function quizPrevStep() {
 function renderQuizResults() {
   const container = document.getElementById('quiz-step-content');
   
-  // Recommendation logic
-  let results = KICKVAULT_PRODUCTS.filter(p => {
+  let results = (KICKVAULT_PRODUCTS || []).filter(p => {
     if (quizAnswers.color && p.colorCategory === quizAnswers.color) return true;
     if (quizAnswers.purpose && p.purpose === quizAnswers.purpose) return true;
     return true;
@@ -590,8 +671,8 @@ function performSearch(query) {
   const container = document.getElementById('search-results-grid');
   if (!container) return;
 
-  const q = query.toLowerCase().trim();
-  const filtered = KICKVAULT_PRODUCTS.filter(p => 
+  const q = (query || '').toLowerCase().trim();
+  const filtered = (KICKVAULT_PRODUCTS || []).filter(p => 
     p.name.toLowerCase().includes(q) ||
     p.brand.toLowerCase().includes(q) ||
     p.color.toLowerCase().includes(q) ||
@@ -623,18 +704,19 @@ function closeTrackingModal() {
 }
 
 function searchOrderTracking() {
-  const input = document.getElementById('tracking-input').value.trim().toUpperCase();
+  const inputEl = document.getElementById('tracking-input');
+  const input = inputEl ? inputEl.value.trim().toUpperCase() : 'KV-1048';
   const resultBox = document.getElementById('tracking-result-box');
   if (!resultBox) return;
 
-  const orderData = SAMPLE_ORDERS[input] || {
+  const orderData = (typeof SAMPLE_ORDERS !== 'undefined' && SAMPLE_ORDERS[input]) || {
     orderId: input || "KV-1048",
     customer: "Cliente KICKVAULT",
     date: "Hoy",
     statusStep: 2,
     statusText: "Pedido procesado en centro de distribución principal",
     trackingCarrier: "Servientrega Express",
-    items: [{ name: "AIR MAX URBAN X", size: 41, price: "$699.900", qty: 1 }],
+    items: [{ name: "AIR MAX URBAN X", size: 41, price: "$699.900 COP", qty: 1 }],
     address: "Dirección registrada"
   };
 
@@ -655,7 +737,6 @@ function searchOrderTracking() {
         <span class="badge badge-neon">${orderData.trackingCarrier}</span>
       </div>
 
-      <!-- Step Tracker Bar -->
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; margin: 30px 0;">
         ${steps.map(step => {
           const isDone = step.num <= orderData.statusStep;
@@ -692,10 +773,10 @@ function processCheckout() {
 
   showToast(`¡Pedido ${orderNum} realizado con éxito! 🔥`);
   
-  // Show Receipt Modal
-  const modal = document.getElementById('tracking-modal');
+  // Show Receipt Tracker
   openTrackingModal();
-  document.getElementById('tracking-input').value = orderNum;
+  const inputEl = document.getElementById('tracking-input');
+  if (inputEl) inputEl.value = orderNum;
   searchOrderTracking();
 }
 

@@ -1,12 +1,12 @@
-// KICKVAULT Products Database & Culture Assets
+// KICKVAULT - Catálogo de Productos y Datos de Cultura (Precios en COP)
 
 const KICKVAULT_PRODUCTS = [
   {
     id: "kv-01",
     name: "AIR MAX URBAN X",
-    brand: "KICKVAULT EXCLUSIVE",
+    brand: "EDICIÓN KICKVAULT",
     price: 699900,
-    formattedPrice: "$699.900",
+    formattedPrice: "$699.900 COP",
     color: "NEGRO / BLANCO",
     colorCategory: "negro",
     style: "urbano",
@@ -30,9 +30,9 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-02",
     name: "CYBER FORCE HIGH ED. 01",
-    brand: "LAB SERIES",
+    brand: "SERIE LABORATORIO",
     price: 899900,
-    formattedPrice: "$899.900",
+    formattedPrice: "$899.900 COP",
     color: "NEGRO / VERDE NEÓN",
     colorCategory: "verde",
     style: "exclusivo",
@@ -56,10 +56,10 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-03",
     name: "PHANTOM DUNK LOW",
-    brand: "STREET CULTURE",
+    brand: "CULTURA URBANA",
     price: 549900,
-    formattedPrice: "$549.900",
-    color: "TRIPLE BLACK",
+    formattedPrice: "$549.900 COP",
+    color: "TRIPLE NEGRO",
     colorCategory: "negro",
     style: "urbano",
     purpose: "Urbano",
@@ -81,9 +81,9 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-04",
     name: "NEON PULSE RUNNER",
-    brand: "KICKVAULT TECH",
+    brand: "TECNOLOGÍA KICKVAULT",
     price: 620000,
-    formattedPrice: "$620.000",
+    formattedPrice: "$620.000 COP",
     color: "NEGRO / VERDE",
     colorCategory: "verde",
     style: "deportivo",
@@ -96,7 +96,7 @@ const KICKVAULT_PRODUCTS = [
     isTrending: false,
     isExclusive: false,
     stock: 5,
-    description: "Ingeniería de carrera urbana. Espuma de retorno energético ultrasuave que impulsa cada paso. Tejido Flyweave sin costuras que se adapta anatómicamente a tu pie.",
+    description: "Ingeniería de carrera urbana. Espuma de retorno energético ultrasuave que impulsa cada paso. Tejido sintético sin costuras que se adapta anatómicamente a tu pie.",
     images: [
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=80",
       "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1000&q=80",
@@ -106,9 +106,9 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-05",
     name: "RETRO COURT 88",
-    brand: "HERITAGE",
+    brand: "HERENCIA CLÁSICA",
     price: 480000,
-    formattedPrice: "$480.000",
+    formattedPrice: "$480.000 COP",
     color: "BLANCO / AZUL",
     colorCategory: "blanco",
     style: "casual",
@@ -121,7 +121,7 @@ const KICKVAULT_PRODUCTS = [
     isTrending: true,
     isExclusive: false,
     stock: 25,
-    description: "La elegancia clásica del baloncesto de los 80 reinterpretada para el vestuario moderno. Cuero blanco premium con detalles en azul cobalto y plantilla acolchada memory foam.",
+    description: "La elegancia clásica del baloncesto de los 80 reinterpretada para el vestuario moderno. Cuero blanco premium con detalles en azul cobalto y plantilla acolchada.",
     images: [
       "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=1000&q=80",
       "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=1000&q=80",
@@ -131,9 +131,9 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-06",
     name: "STREET VOID MID",
-    brand: "KICKVAULT EXCLUSIVE",
+    brand: "EDICIÓN KICKVAULT",
     price: 780000,
-    formattedPrice: "$780.000",
+    formattedPrice: "$780.000 COP",
     color: "GRIS / NEGRO",
     colorCategory: "negro",
     style: "urbano",
@@ -156,9 +156,9 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-07",
     name: "OVERHEAT RED EDITION",
-    brand: "LAB SERIES",
+    brand: "SERIE LABORATORIO",
     price: 849900,
-    formattedPrice: "$849.900",
+    formattedPrice: "$849.900 COP",
     color: "ROJO / NEGRO",
     colorCategory: "rojo",
     style: "exclusivo",
@@ -171,7 +171,7 @@ const KICKVAULT_PRODUCTS = [
     isTrending: true,
     isExclusive: true,
     stock: 4,
-    description: "Colorway de alto impacto con tonalidades carmesí y acabados en negro carbón. Construcción ligera reforzada con fibra de carbono para máxima presencia visual.",
+    description: "Colorway de alto impacto con tonalidades carmesí y acabados en negro carbón. Construcción ligera reforzada para máxima presencia visual.",
     images: [
       "https://images.unsplash.com/photo-1514989940723-e8e51635b782?auto=format&fit=crop&w=1000&q=80",
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=80",
@@ -181,10 +181,10 @@ const KICKVAULT_PRODUCTS = [
   {
     id: "kv-08",
     name: "APEX CASUAL PRIME",
-    brand: "STREET CULTURE",
+    brand: "CULTURA URBANA",
     price: 399900,
-    formattedPrice: "$399.900",
-    color: "BLANCO PURAS",
+    formattedPrice: "$399.900 COP",
+    color: "BLANCO PURO",
     colorCategory: "blanco",
     style: "casual",
     purpose: "Uso diario",
@@ -207,7 +207,7 @@ const KICKVAULT_PRODUCTS = [
 
 const KICKVAULT_CULTURE = [
   {
-    title: "CULTURA SKATE & STREET",
+    title: "CULTURA SKATE & CALLE",
     subtitle: "El asfalto es nuestro lienzo",
     image: "https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?auto=format&fit=crop&w=1000&q=80",
     desc: "Nacidos de las calles. El movimiento urbano inspira cada costura y cada suela de nuestras colecciones."
@@ -219,7 +219,7 @@ const KICKVAULT_CULTURE = [
     desc: "La energía de las canchas callejeras llevada a la alta tecnología de calzado deportivo."
   },
   {
-    title: "ARQUITECTURA & MODA",
+    title: "ARQUITECTURA & MODA URBANA",
     subtitle: "Líneas agresivas e innovadoras",
     image: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=1000&q=80",
     desc: "Estilo que trasciende lo convencional para definir la estética de las metrópolis modernas."
@@ -235,7 +235,7 @@ const SAMPLE_ORDERS = {
     statusText: "En tránsito - Entrega estimada: Mañana 2:00 PM",
     trackingCarrier: "Servientrega Express",
     items: [
-      { name: "AIR MAX URBAN X", size: 41, price: "$699.900", qty: 1 }
+      { name: "AIR MAX URBAN X", size: 41, price: "$699.900 COP", qty: 1 }
     ],
     address: "Calle 100 #15-32, Bogotá D.C."
   },
@@ -247,7 +247,7 @@ const SAMPLE_ORDERS = {
     statusText: "Preparando pedido en bodega principal KICKVAULT",
     trackingCarrier: "DHL Express",
     items: [
-      { name: "CYBER FORCE HIGH ED. 01", size: 39, price: "$899.900", qty: 1 }
+      { name: "CYBER FORCE HIGH ED. 01", size: 39, price: "$899.900 COP", qty: 1 }
     ],
     address: "Cra 43A #1-50, Medellín"
   }
