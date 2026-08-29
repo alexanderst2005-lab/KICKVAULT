@@ -1296,57 +1296,6 @@ function closeAdminOrdersModal() {
   document.body.style.overflow = '';
 }
 
-const ORDERS_STORAGE_KEY = 'kickvault_all_orders_v1';
-
-function getInitialSampleOrders() {
-  return [
-    {
-      orderId: "KV-8921",
-      customer: "Mateo Alexander",
-      phone: "3001234567",
-      email: "mateo@kickvault.co",
-      city: "Bogotá",
-      neighborhood: "Chapinero Alto",
-      address: "Calle 67 #12-45 Apto 502 (Chapinero Alto), Bogotá",
-      notes: "Timbrar en la portería principal",
-      date: "28 de agosto, 2026 - 22:30",
-      statusStep: 1,
-      statusText: "Pedido recibido y confirmado en sistema KICKVAULT",
-      trackingCarrier: "Servientrega Express",
-      totalPrice: "$1.599.800 COP",
-      totalPriceNum: 1599800,
-      items: [
-        { name: "CYBER FORCE HIGH ED. 01", size: 38, price: "$899.900 COP", qty: 1 },
-        { name: "AIR MAX URBAN X", size: 42, price: "$699.900 COP", qty: 1 }
-      ]
-    }
-  ];
-}
-
-function loadAllOrders() {
-  try {
-    const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
-    if (!raw) {
-      const sample = getInitialSampleOrders();
-      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(sample));
-      return sample;
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    console.error("Error loading orders from localStorage:", e);
-    return getInitialSampleOrders();
-  }
-}
-
-function saveAllOrders(ordersArray) {
-  try {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(ordersArray));
-  } catch (e) {
-    console.error("Error saving orders to localStorage:", e);
-  }
-}
-
 function renderAdminOrdersList() {
   const listEl = document.getElementById('admin-orders-list');
   const countEl = document.getElementById('admin-total-orders-count');
