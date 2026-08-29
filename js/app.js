@@ -193,15 +193,16 @@ const PRODUCTS_STORAGE_KEY = 'kickvault_custom_products_v1';
 function getActiveProductsCatalog() {
   try {
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (!raw) {
-      return (typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : [];
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
     }
-    const parsed = JSON.parse(raw);
-    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : ((typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : []);
   } catch (e) {
     console.warn("KICKVAULT: Error al leer catálogo de localStorage:", e);
-    return (typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : [];
   }
+  return (typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : [];
 }
 
 function saveActiveProductsCatalog(productsList) {
