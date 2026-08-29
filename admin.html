@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>KICKVAULT | Panel de Administración 🔐</title>
+  <link rel="stylesheet" href="css/styles.css?v=20260828-FULL-ADMIN">
+  <style>
+    body {
+      background: #050505;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    .admin-login-screen {
+      position: fixed;
+      inset: 0;
+      background: #050505;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #111111;
+      border: 1px solid #262626;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      text-align: center;
+    }
+    .login-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .admin-nav {
+      background: #0c0c0c;
+      border-bottom: 1px solid #222;
+      padding: 20px 0;
+      margin-bottom: 30px;
+    }
+    .admin-nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-tab-btn {
+      background: transparent;
+      border: none;
+      color: #888;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .admin-tab-btn.active {
+      color: var(--neon-green);
+      border-bottom-color: var(--neon-green);
+    }
+    .inventory-card {
+      background: #141414;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .inventory-card img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #080808;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN LOGIN GATE SCREEN -->
+  <div id="login-gate" class="admin-login-screen">
+    <div class="login-card">
+      <div style="margin-bottom: 16px;">
+        <span class="badge badge-neon">ACCESO RESTRINGIDO 🔐</span>
+      </div>
+      <h1 class="login-title">KICK<span>VAULT</span> ADMIN</h1>
+      <p style="color: #888; font-size: 0.9rem; margin-bottom: 24px;">Ingresa la contraseña de administrador para gestionar tu tienda.</p>
+
+      <form onsubmit="handleAdminLogin(event)">
+        <input type="password" id="admin-pass-input" class="search-input-field" placeholder="Contraseña de acceso..." required style="margin-bottom: 16px; text-align: center; font-size: 1.1rem; padding: 14px;">
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 14px; font-size: 1rem;">ENTRAR AL PANEL 🔓</button>
+      </form>
+      <p id="login-error-msg" style="color: #ff4444; font-size: 0.85rem; margin-top: 14px; display: none;">Contraseña incorrecta. Inténtalo de nuevo.</p>
+    </div>
+  </div>
+
+  <!-- MAIN ADMIN DASHBOARD CONTENT -->
+  <div id="admin-dashboard-content" style="display: none;">
+    <header class="admin-nav">
+      <div class="container">
+        <div class="admin-nav-content">
+          <a href="#" class="logo">KICK<span>VAULT</span> <span style="font-size: 0.9rem; color: var(--neon-green); font-family: var(--font-body); font-weight: 700;">| PANEL ADMIN</span></a>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="index.html" target="_blank" class="btn btn-secondary" style="font-size: 0.82rem; padding: 8px 14px;">VER TIENDA PÚBLICA 🌐</a>
+            <button onclick="handleAdminLogout()" class="btn btn-secondary" style="font-size: 0.82rem; padding: 8px 14px; border-color: #ff4444; color: #ff4444;">CERRAR SESIÓN 🔒</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container" style="padding-bottom: 60px;">
+      
+      <!-- TABS NAVIGATION -->
+      <div style="display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid var(--border-color);">
+        <button id="tab-btn-orders" class="admin-tab-btn active" onclick="switchAdminTab('orders')">📋 PEDIDOS Y VENTAS</button>
+        <button id="tab-btn-catalog" class="admin-tab-btn" onclick="switchAdminTab('catalog')">👟 GESTIÓN DE PRODUCTOS E INVENTARIO</button>
+      </div>
+
+      <!-- TAB 1: ORDERS & SALES -->
+      <div id="tab-content-orders">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2 class="section-title" style="font-size: 2.2rem;">CONTROL DE PEDIDOS Y VENTAS 📋</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Gestiona en tiempo real las compras realizadas por tus clientes.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="clearTestOrdersAdmin()" style="font-size: 0.8rem; padding: 10px 16px;">VACIAR PRUEBAS 🗑️</button>
+        </div>
+
+        <!-- Stats Summary Grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px;">
+          <div style="background: #111; border: 1px solid var(--border-color); padding: 24px; border-radius: var(--radius-md); text-align: center;">
+            <span style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Total Pedidos</span>
+            <h3 id="stat-total-orders" style="font-size: 2.4rem; color: var(--neon-green); font-family: var(--font-heading); margin-top: 6px;">0</h3>
+          </div>
+          <div style="background: #111; border: 1px solid var(--border-color); padding: 24px; border-radius: var(--radius-md); text-align: center;">
+            <span style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Ventas Totales</span>
+            <h3 id="stat-total-sales" style="font-size: 2.4rem; color: #fff; font-family: var(--font-heading); margin-top: 6px;">$0 COP</h3>
+          </div>
+          <div style="background: #111; border: 1px solid var(--border-color); padding: 24px; border-radius: var(--radius-md); text-align: center;">
+            <span style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Pedidos Pendientes</span>
+            <h3 id="stat-pending-orders" style="font-size: 2.4rem; color: #ff2a5f; font-family: var(--font-heading); margin-top: 6px;">0</h3>
+          </div>
+        </div>
+
+        <!-- Orders Table Container -->
+        <div style="background: #111; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
+          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 20px; color: var(--neon-green);">HISTORIAL DE COMPRAS</h3>
+          <div id="standalone-admin-orders-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: PRODUCTS CATALOG MANAGEMENT -->
+      <div id="tab-content-catalog" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2 class="section-title" style="font-size: 2.2rem;">INVENTARIO Y CATÁLOGO DE PRODUCTOS 👟</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Agrega nuevos tenis, modifica precios, cambia la disponibilidad (Agotado) o edita los modelos.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewProductFormAdmin()" style="font-size: 0.9rem; padding: 12px 20px;">+ AGREGAR NUEVO PRODUCTO</button>
+        </div>
+
+        <!-- Search Bar in Inventory -->
+        <div style="margin-bottom: 24px;">
+          <input type="text" id="admin-inventory-search" class="search-input-field" placeholder="Filtrar productos por nombre, marca o color..." oninput="filterAdminInventory(this.value)" style="padding: 12px;">
+        </div>
+
+        <!-- Inventory List Container -->
+        <div id="admin-inventory-list" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD / EDIT PRODUCT MODAL FORM -->
+  <div id="admin-product-form-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 650px;">
+      <button class="modal-close-btn" onclick="closeAdminProductFormModal()">✕</button>
+
+      <span class="badge badge-neon" style="margin-bottom: 8px;">GESTIÓN DE CATÁLOGO</span>
+      <h2 id="product-form-modal-title" class="section-title" style="font-size: 2rem; margin-bottom: 16px;">AGREGAR NUEVO PRODUCTO 👟</h2>
+
+      <form id="admin-product-form" onsubmit="saveProductSubmitAdmin(event)">
+        <input type="hidden" id="pf-product-id" value="">
+
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">NOMBRE DEL MODELO *</label>
+            <input type="text" id="pf-name" class="search-input-field" placeholder="Ej. JORDAN 1 RETRO HIGH" required style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">MARCA / COLECCIÓN *</label>
+              <input type="text" id="pf-brand" class="search-input-field" placeholder="Ej. EDICIÓN KICKVAULT" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">PRECIO ($ COP) *</label>
+              <input type="number" id="pf-price" class="search-input-field" placeholder="Ej. 780000" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">COLORWAY / COLOR *</label>
+              <input type="text" id="pf-color" class="search-input-field" placeholder="Ej. ROJO / BLANCO / NEGRO" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">ESTADO DE DISPONIBILIDAD *</label>
+              <select id="pf-soldout" class="search-input-field" style="font-size: 0.95rem; padding: 12px; background: #1a1a1a; color: #fff;">
+                <option value="false">✅ DISPONIBLE EN STOCK</option>
+                <option value="true">❌ AGOTADO (SIN STOCK)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">TALLAS DISPONIBLES (SEPARADAS POR COMAS) *</label>
+            <input type="text" id="pf-sizes" class="search-input-field" placeholder="Ej. 38, 39, 40, 41, 42, 43, 44" value="38, 39, 40, 41, 42, 43, 44" required style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">URL DE LA IMAGEN PRINCIPAL *</label>
+            <input type="url" id="pf-image" class="search-input-field" placeholder="https://..." required style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">DESCRIPCIÓN DEL PRODUCTO *</label>
+            <textarea id="pf-desc" class="search-input-field" rows="3" placeholder="Detalles de materiales, estilo y diseño..." required style="font-size: 0.9rem; padding: 12px; font-family: inherit;"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="font-size: 1.05rem; padding: 16px;">
+          GUARDAR PRODUCTO EN EL CATÁLOGO 💾
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/data.js?v=20260828-FULL-ADMIN"></script>
+  <script src="js/app.js?v=20260828-FULL-ADMIN"></script>
+  <script>
+    const ADMIN_PASS = '1234';
+
+    function checkAdminAuth() {
+      const isAuth = sessionStorage.getItem('kickvault_admin_authenticated') === 'true';
+      const gate = document.getElementById('login-gate');
+      const content = document.getElementById('admin-dashboard-content');
+      if (isAuth) {
+        if (gate) gate.style.display = 'none';
+        if (content) content.style.display = 'block';
+        renderStandaloneAdminOrders();
+        renderAdminInventoryList();
+      } else {
+        if (gate) gate.style.display = 'flex';
+        if (content) content.style.display = 'none';
+      }
+    }
+
+    function handleAdminLogin(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('admin-pass-input')?.value.trim();
+      const errorMsg = document.getElementById('login-error-msg');
+      if (input === ADMIN_PASS || input === 'kickvault2026' || input === 'admin') {
+        sessionStorage.setItem('kickvault_admin_authenticated', 'true');
+        if (errorMsg) errorMsg.style.display = 'none';
+        checkAdminAuth();
+      } else {
+        if (errorMsg) errorMsg.style.display = 'block';
+      }
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('kickvault_admin_authenticated');
+      checkAdminAuth();
+    }
+
+    function switchAdminTab(tabName) {
+      const ordersTab = document.getElementById('tab-content-orders');
+      const catalogTab = document.getElementById('tab-content-catalog');
+      const btnOrders = document.getElementById('tab-btn-orders');
+      const btnCatalog = document.getElementById('tab-btn-catalog');
+
+      if (tabName === 'orders') {
+        if (ordersTab) ordersTab.style.display = 'block';
+        if (catalogTab) catalogTab.style.display = 'none';
+        if (btnOrders) btnOrders.classList.add('active');
+        if (btnCatalog) btnCatalog.classList.remove('active');
+        renderStandaloneAdminOrders();
+      } else {
+        if (ordersTab) ordersTab.style.display = 'none';
+        if (catalogTab) catalogTab.style.display = 'block';
+        if (btnOrders) btnOrders.classList.remove('active');
+        if (btnCatalog) btnCatalog.classList.add('active');
+        renderAdminInventoryList();
+      }
+    }
+
+    function renderStandaloneAdminOrders() {
+      const listEl = document.getElementById('standalone-admin-orders-list');
+      const countEl = document.getElementById('stat-total-orders');
+      const salesEl = document.getElementById('stat-total-sales');
+      const pendingEl = document.getElementById('stat-pending-orders');
+      if (!listEl) return;
+
+      const orders = loadAllOrders();
+
+      let totalSales = 0;
+      let pendingCount = 0;
+
+      orders.forEach(o => {
+        if (o.totalPriceNum) totalSales += o.totalPriceNum;
+        if (o.statusStep < 4) pendingCount++;
+      });
+
+      if (countEl) countEl.textContent = orders.length;
+      if (salesEl) salesEl.textContent = formatCOP(totalSales);
+      if (pendingEl) pendingEl.textContent = pendingCount;
+
+      if (orders.length === 0) {
+        listEl.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 40px;">No hay pedidos registrados en el sistema actualmente.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = orders.map(order => `
+        <div style="background: #181818; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <div>
+              <span style="color: var(--neon-green); font-family: var(--font-heading); font-size: 1.6rem;">Nº ${order.orderId}</span>
+              <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 12px;">${order.date}</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <select onchange="updateOrderStatusAdmin('${order.orderId}', this.value)" style="background: #222; color: var(--neon-green); border: 1.5px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+                <option value="1" ${order.statusStep == 1 ? 'selected' : ''}>1. Confirmado</option>
+                <option value="2" ${order.statusStep == 2 ? 'selected' : ''}>2. En Preparación</option>
+                <option value="3" ${order.statusStep == 3 ? 'selected' : ''}>3. En Camino</option>
+                <option value="4" ${order.statusStep == 4 ? 'selected' : ''}>4. Entregado</option>
+              </select>
+              <button onclick="deleteOrderStandaloneAdmin('${order.orderId}')" style="color: #ff4444; font-size: 0.85rem; text-decoration: underline; background: none; border: none; cursor: pointer;">Eliminar</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; font-size: 0.92rem;">
+            <div>
+              <p style="color: #fff; font-weight: 700; margin-bottom: 4px;">👤 Cliente: ${order.customer}</p>
+              <p style="color: #bbb; margin-bottom: 4px;">📱 Teléfono: ${order.phone || 'No registrado'}</p>
+              <p style="color: #bbb; margin-bottom: 4px;">📧 Email: ${order.email || 'No registrado'}</p>
+              <p style="color: #bbb;">🏠 Dirección: ${order.address}</p>
+              ${order.notes ? `<p style="color: var(--neon-green); font-size: 0.85rem; margin-top: 4px;">📝 Notas: ${order.notes}</p>` : ''}
+            </div>
+            <div>
+              <p style="color: var(--neon-green); font-weight: 800; font-size: 1.2rem; margin-bottom: 4px;">Total: ${order.totalPrice || '$0 COP'}</p>
+              <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 10px;">📍 Estado: ${order.statusText}</p>
+              ${order.phone ? `
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button onclick="sendStatusNoticeWhatsApp('${order.orderId}')" class="btn btn-primary" style="font-size: 0.78rem; padding: 6px 12px; background: var(--neon-green); color: #000; font-weight: 700;">
+                    📲 Enviar Estado al WhatsApp
+                  </button>
+                  <a href="https://wa.me/${order.phone.replace(/\D/g, '')}" target="_blank" class="btn btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;">
+                    💬 Chat Directo
+                  </a>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div style="background: #0e0e0e; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 0.88rem;">
+            <span style="font-weight: 700; color: var(--neon-green);">Productos comprados:</span>
+            <ul style="margin-left: 20px; color: #ddd; margin-top: 6px;">
+              ${(order.items || []).map(i => `<li>${i.name} — <strong>Talla ${i.size} EUR</strong> (x${i.qty || 1}) - ${i.price}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendStatusNoticeWhatsApp(orderId) {
+      const orders = loadAllOrders();
+      const order = orders.find(o => o.orderId === orderId);
+      if (!order || !order.phone) {
+        alert("Este cliente no tiene un número de teléfono registrado.");
+        return;
+      }
+
+      const phoneClean = order.phone.replace(/\D/g, '');
+      const itemsText = (order.items || []).map(i => `${i.name} (Talla ${i.size} EUR)`).join(', ');
+
+      let message = "";
+      if (order.statusStep == 1) {
+        message = `¡Hola ${order.customer}! 🔥 Te confirmamos que tu pedido #${order.orderId} (${itemsText}) ha sido registrado exitosamente en KICKVAULT. Estamos procesando tu solicitud.`;
+      } else if (order.statusStep == 2) {
+        message = `¡Hola ${order.customer}! 📦 Tu pedido #${order.orderId} (${itemsText}) está siendo empacado y preparado en nuestra bodega KICKVAULT para ser enviado a ${order.address}.`;
+      } else if (order.statusStep == 3) {
+        message = `¡Hola ${order.customer}! 🚚 Tu pedido #${order.orderId} (${itemsText}) ya va en camino hacia ${order.address}. Guía de rastreo: #${order.orderId}. Puedes seguir tu paquete en nuestra web.`;
+      } else if (order.statusStep == 4) {
+        message = `¡Hola ${order.customer}! 🎉 Tu pedido #${order.orderId} (${itemsText}) ha sido entregado satisfactoriamente. ¡Muchas gracias por comprar en KICKVAULT! 🔥`;
+      }
+
+      const url = `https://wa.me/${phoneClean}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+    }
+
+    function renderAdminInventoryList(filterQuery = '') {
+      const container = document.getElementById('admin-inventory-list');
+      if (!container) return;
+
+      const products = getActiveProductsCatalog();
+      const q = (filterQuery || '').toLowerCase().trim();
+
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.brand.toLowerCase().includes(q) || 
+        p.color.toLowerCase().includes(q)
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 40px;">No se encontraron productos en el inventario.</p>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(product => {
+        const isSoldOut = product.isSoldOut || product.stock === 0;
+        return `
+          <div class="inventory-card">
+            <img src="${product.images && product.images[0] ? product.images[0] : 'https://via.placeholder.com/150'}" alt="${product.name}">
+            <div style="flex-grow: 1;">
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                <span class="product-brand" style="font-size: 0.75rem;">${product.brand}</span>
+                <span class="badge ${isSoldOut ? 'badge-soldout' : 'badge-neon'}" style="font-size: 0.7rem; ${isSoldOut ? 'background: #ff2a5f; color: #fff;' : ''}">
+                  ${isSoldOut ? '❌ AGOTADO' : '✅ EN STOCK'}
+                </span>
+              </div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 2px;">${product.name}</h3>
+              <p style="color: #888; font-size: 0.85rem; margin-bottom: 6px;">Color: ${product.color} · Tallas: ${(product.sizes || []).join(', ')}</p>
+              <p style="color: var(--neon-green); font-weight: 800; font-size: 1rem;">${product.formattedPrice || formatCOP(product.price)}</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 170px;">
+              <button onclick="toggleStockStatusAdmin('${product.id}')" class="btn btn-secondary" style="font-size: 0.78rem; padding: 6px 10px; text-align: center;">
+                ${isSoldOut ? '✅ Marcar EN STOCK' : '⚡ Marcar AGOTADO'}
+              </button>
+              <div style="display: flex; gap: 8px;">
+                <button onclick="editProductAdmin('${product.id}')" class="btn btn-primary" style="flex: 1; font-size: 0.78rem; padding: 6px 10px;">✏️ Editar</button>
+                <button onclick="deleteProductAdmin('${product.id}')" style="color: #ff4444; font-size: 0.78rem; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 6px;">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterAdminInventory(val) {
+      renderAdminInventoryList(val);
+    }
+
+    function toggleStockStatusAdmin(productId) {
+      let products = getActiveProductsCatalog();
+      const target = products.find(p => p.id === productId);
+      if (!target) return;
+
+      target.isSoldOut = !target.isSoldOut;
+      saveActiveProductsCatalog(products);
+      renderAdminInventoryList();
+      showToast(`Estado de inventario actualizado para ${target.name}`);
+    }
+
+    function deleteProductAdmin(productId) {
+      if (!confirm("¿Estás seguro de que deseas eliminar este producto del catálogo?")) return;
+      let products = getActiveProductsCatalog();
+      products = products.filter(p => p.id !== productId);
+      saveActiveProductsCatalog(products);
+      renderAdminInventoryList();
+      showToast("Producto eliminado del catálogo");
+    }
+
+    function openNewProductFormAdmin() {
+      const modal = document.getElementById('admin-product-form-modal');
+      const form = document.getElementById('admin-product-form');
+      const title = document.getElementById('product-form-modal-title');
+      if (form) form.reset();
+      if (title) title.textContent = "AGREGAR NUEVO PRODUCTO 👟";
+      document.getElementById('pf-product-id').value = "";
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function editProductAdmin(productId) {
+      const products = getActiveProductsCatalog();
+      const target = products.find(p => p.id === productId);
+      if (!target) return;
+
+      const modal = document.getElementById('admin-product-form-modal');
+      const title = document.getElementById('product-form-modal-title');
+      if (title) title.textContent = "EDITAR PRODUCTO ✏️";
+
+      document.getElementById('pf-product-id').value = target.id;
+      document.getElementById('pf-name').value = target.name || "";
+      document.getElementById('pf-brand').value = target.brand || "";
+      document.getElementById('pf-price').value = target.price || 0;
+      document.getElementById('pf-color').value = target.color || "";
+      document.getElementById('pf-soldout').value = (target.isSoldOut ? "true" : "false");
+      document.getElementById('pf-sizes').value = (target.sizes || [38,39,40,41,42,43,44]).join(', ');
+      document.getElementById('pf-image').value = (target.images && target.images[0]) ? target.images[0] : "";
+      document.getElementById('pf-desc').value = target.description || "";
+
+      if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeAdminProductFormModal() {
+      const modal = document.getElementById('admin-product-form-modal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function saveProductSubmitAdmin(e) {
+      if (e) e.preventDefault();
+
+      const pid = document.getElementById('pf-product-id').value.trim();
+      const name = document.getElementById('pf-name').value.trim();
+      const brand = document.getElementById('pf-brand').value.trim();
+      const price = parseFloat(document.getElementById('pf-price').value);
+      const color = document.getElementById('pf-color').value.trim();
+      const isSoldOut = document.getElementById('pf-soldout').value === 'true';
+      const sizesStr = document.getElementById('pf-sizes').value.trim();
+      const image = document.getElementById('pf-image').value.trim();
+      const desc = document.getElementById('pf-desc').value.trim();
+
+      const sizes = sizesStr.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+
+      let products = getActiveProductsCatalog();
+
+      if (pid) {
+        // Edit existing
+        const target = products.find(p => p.id === pid);
+        if (target) {
+          target.name = name;
+          target.brand = brand;
+          target.price = price;
+          target.formattedPrice = formatCOP(price);
+          target.color = color;
+          target.isSoldOut = isSoldOut;
+          target.sizes = sizes.length > 0 ? sizes : [38,39,40,41,42,43,44];
+          target.images = [image];
+          target.description = desc;
+        }
+      } else {
+        // Create new
+        const newId = 'kv-' + Date.now().toString().slice(-4);
+        const newProductObj = {
+          id: newId,
+          name: name,
+          brand: brand,
+          price: price,
+          formattedPrice: formatCOP(price),
+          color: color,
+          colorCategory: "urbano",
+          style: "urbano",
+          purpose: "Urbano",
+          sizes: sizes.length > 0 ? sizes : [38,39,40,41,42,43,44],
+          rating: 4.9,
+          reviewsCount: 1,
+          badges: ["NUEVO"],
+          isNew: true,
+          isTrending: true,
+          isExclusive: false,
+          isSoldOut: isSoldOut,
+          stock: isSoldOut ? 0 : 10,
+          description: desc,
+          images: [image]
+        };
+        products.unshift(newProductObj);
+      }
+
+      saveActiveProductsCatalog(products);
+      closeAdminProductFormModal();
+      renderAdminInventoryList();
+      showToast("¡Producto guardado exitosamente en el catálogo! 🔥");
+    }
+
+    function updateOrderStatusAdmin(orderId, newStep) {
+      updateOrderStatus(orderId, newStep);
+      renderStandaloneAdminOrders();
+    }
+
+    function deleteOrderStandaloneAdmin(orderId) {
+      deleteOrderAdmin(orderId);
+      renderStandaloneAdminOrders();
+    }
+
+    function clearTestOrdersAdmin() {
+      clearTestOrders();
+      renderStandaloneAdminOrders();
+    }
+
+    document.addEventListener('DOMContentLoaded', checkAdminAuth);
+  </script>
+</body>
+</html>

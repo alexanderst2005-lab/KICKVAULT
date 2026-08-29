@@ -226,29 +226,4 @@ const KICKVAULT_CULTURE = [
   }
 ];
 
-const SAMPLE_ORDERS = {
-  "KV-1048": {
-    orderId: "KV-1048",
-    customer: "Mateo Pérez",
-    date: "16 de Agosto, 2026",
-    statusStep: 3,
-    statusText: "En tránsito - Entrega estimada: Mañana 2:00 PM",
-    trackingCarrier: "Servientrega Express",
-    items: [
-      { name: "AIR MAX URBAN X", size: 41, price: "$699.900 COP", qty: 1 }
-    ],
-    address: "Calle 100 #15-32, Bogotá D.C."
-  },
-  "KV-2090": {
-    orderId: "KV-2090",
-    customer: "Camila Torres",
-    date: "17 de Agosto, 2026",
-    statusStep: 2,
-    statusText: "Preparando pedido en bodega principal KICKVAULT",
-    trackingCarrier: "DHL Express",
-    items: [
-      { name: "CYBER FORCE HIGH ED. 01", size: 39, price: "$899.900 COP", qty: 1 }
-    ],
-    address: "Cra 43A #1-50, Medellín"
-  }
-};
+const SAMPLE_ORDERS = {};

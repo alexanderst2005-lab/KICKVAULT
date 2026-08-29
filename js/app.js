@@ -51,8 +51,28 @@ function formatCOP(amount) {
   return `$${amount.toLocaleString('es-CO')} COP`;
 }
 
+// Disable browser scroll memory on reload
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+function resetScrollToTop() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+// Reset scroll instantly before DOM load
+resetScrollToTop();
+
 // App Initialization with Defensive Error Handlers
 document.addEventListener('DOMContentLoaded', () => {
+  // Always force scroll to top on reload
+  resetScrollToTop();
+  if (window.location.hash) {
+    history.replaceState(null, null, window.location.pathname);
+  }
+
   // Ensure body scroll is unlocked on reload
   document.body.style.overflow = '';
   document.body.style.display = 'block';
@@ -71,6 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
   runSafely(setupQuiz, "Test Encuentra tu Zapatilla");
   runSafely(setupSearch, "Buscador");
 });
+
+window.addEventListener('load', resetScrollToTop);
+window.addEventListener('pageshow', resetScrollToTop);
 
 function runSafely(fn, label) {
   try {
@@ -143,25 +166,75 @@ function showToast(message) {
   }, 3200);
 }
 
-function showSizeGuideToast() {
-  showToast("📐 Tabla de Tallas KICKVAULT: 38 (24.5cm) · 39 (25cm) · 40 (25.5cm) · 41 (26.5cm) · 42 (27cm) · 43 (28cm) · 44 (28.5cm)");
+function showSizeGuideToast(e) {
+  if (e) e.preventDefault();
+  openSizeGuideModal(e);
 }
 
-/* ==========================================================================
-   CLEAN LUXURY PRODUCT CARDS (TAP TO OPEN MODAL & SELECT SIZE)
-   ========================================================================== */
+function openSizeGuideModal(e) {
+  if (e) e.preventDefault();
+  const modal = document.getElementById('size-guide-modal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } else {
+    showToast("📐 Tabla de Tallas KICKVAULT: 38 (24.5cm) · 39 (25cm) · 40 (25.5cm) · 41 (26.5cm) · 42 (27cm) · 43 (28cm) · 44 (28.5cm)");
+  }
+}
+
+function closeSizeGuideModal() {
+  const modal = document.getElementById('size-guide-modal');
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+const PRODUCTS_STORAGE_KEY = 'kickvault_custom_products_v1';
+
+function getActiveProductsCatalog() {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+    if (!raw) {
+      return (typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : [];
+    }
+    const parsed = JSON.parse(raw);
+    return (Array.isArray(parsed) && parsed.length > 0) ? parsed : ((typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : []);
+  } catch (e) {
+    console.warn("KICKVAULT: Error al leer catálogo de localStorage:", e);
+    return (typeof KICKVAULT_PRODUCTS !== 'undefined') ? KICKVAULT_PRODUCTS : [];
+  }
+}
+
+function saveActiveProductsCatalog(productsList) {
+  try {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(productsList));
+  } catch (e) {
+    console.error("KICKVAULT: Error guardando catálogo en localStorage:", e);
+  }
+}
+
 function createProductCardHTML(product) {
   if (!product) return '';
   const isFav = favorites.has(product.id);
-  const badgesHTML = (product.badges || []).map(b => {
+  const isSoldOut = product.isSoldOut || product.stock === 0;
+
+  // If sold out, ONLY show AGOTADO badge. Hide all other badges!
+  let badgesArr = [];
+  if (isSoldOut) {
+    badgesArr = ["AGOTADO"];
+  } else {
+    badgesArr = [...(product.badges || [])];
+  }
+
+  const badgesHTML = badgesArr.map(b => {
+    const isSoldOutBadge = b.includes("AGOTADO");
     const isNeon = b.includes("EDICIÓN") || b.includes("NUEV") || b.includes("EXCLUSIVO") || b.includes("TENDENCIA");
-    return `<span class="badge ${isNeon ? 'badge-neon' : ''}">${b}</span>`;
+    return `<span class="badge ${isSoldOutBadge ? 'badge-soldout' : (isNeon ? 'badge-neon' : '')}" style="${isSoldOutBadge ? 'background: #ff2a5f; color: #fff;' : ''}">${b}</span>`;
   }).join('');
 
   const displayPrice = product.formattedPrice || formatCOP(product.price);
 
   return `
-    <div class="product-card" data-id="${product.id}" onclick="openProductModal('${product.id}')" style="cursor: pointer;">
+    <div class="product-card ${isSoldOut ? 'sold-out' : ''}" data-id="${product.id}" onclick="openProductModal('${product.id}', 'view')" style="cursor: pointer;">
       <div class="product-media">
         <div class="card-badges">${badgesHTML}</div>
         <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFavorite('${product.id}', event)" title="Guardar en favoritos">
@@ -169,9 +242,9 @@ function createProductCardHTML(product) {
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
-        <img src="${product.images[0]}" alt="${product.name}" loading="lazy" decoding="async" fetchpriority="high">
+        <img src="${(product.images && product.images[0]) ? product.images[0] : 'https://via.placeholder.com/400'}" alt="${product.name}" loading="lazy" decoding="async" fetchpriority="high">
         <div class="hover-overlay">
-          <button class="btn btn-primary" onclick="openProductModal('${product.id}'); event.stopPropagation();">VER MODELO →</button>
+          <button class="btn btn-primary" onclick="openProductModal('${product.id}', 'view'); event.stopPropagation();">${isSoldOut ? 'VER DETALLES' : 'VER MODELO →'}</button>
         </div>
       </div>
 
@@ -182,8 +255,8 @@ function createProductCardHTML(product) {
         
         <div class="product-footer">
           <span class="product-price">${displayPrice}</span>
-          <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; font-weight: 700;" onclick="openProductModal('${product.id}'); event.stopPropagation();">
-            VER TALLAS →
+          <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.78rem; font-weight: 700; ${isSoldOut ? 'border-color: #ff2a5f; color: #ff2a5f;' : ''}" onclick="openProductModal('${product.id}', 'size'); event.stopPropagation();">
+            ${isSoldOut ? 'AGOTADO ❌' : 'VER TALLAS →'}
           </button>
         </div>
       </div>
@@ -191,24 +264,82 @@ function createProductCardHTML(product) {
   `;
 }
 
+/* ==========================================================================
+   PURE IMAGE VIEWER (SOLO MUESTRA IMÁGENES DE LOS MODELOS)
+   ========================================================================== */
+function openPureImageViewer(productId) {
+  const products = getActiveProductsCatalog();
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  const modal = document.getElementById('pure-image-viewer-modal');
+  if (!modal) return;
+
+  const images = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images
+    : ["https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80"];
+
+  const brandEl = document.getElementById('piv-brand');
+  if (brandEl) brandEl.textContent = product.brand || 'KICKVAULT';
+
+  const titleEl = document.getElementById('piv-title');
+  if (titleEl) titleEl.textContent = product.name || 'FOTOS DEL MODELO';
+
+  const mainImg = document.getElementById('piv-main-img');
+  if (mainImg) mainImg.src = images[0];
+
+  const thumbsBar = document.getElementById('piv-thumbs-bar');
+  if (thumbsBar) {
+    thumbsBar.innerHTML = images.map((imgUrl, idx) => `
+      <img src="${imgUrl}" class="thumb-img ${idx === 0 ? 'active' : ''}" onclick="switchPureImg('${imgUrl}', this)" alt="Vista ${idx + 1}" style="width: 110px; height: 80px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid ${idx === 0 ? 'var(--neon-green)' : 'transparent'}; flex-shrink: 0;">
+    `).join('');
+  }
+
+  // Force explicit active visibility to guarantee instant rendering
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.visibility = 'visible';
+  modal.style.pointerEvents = 'auto';
+  document.body.style.overflow = 'hidden';
+}
+
+function switchPureImg(imgUrl, thumbEl) {
+  const mainImg = document.getElementById('piv-main-img');
+  if (mainImg) mainImg.src = imgUrl;
+
+  const bar = document.getElementById('piv-thumbs-bar');
+  if (bar) {
+    bar.querySelectorAll('img').forEach(el => el.style.borderColor = 'transparent');
+  }
+  if (thumbEl) thumbEl.style.borderColor = 'var(--neon-green)';
+}
+
+function closePureImageViewer() {
+  const modal = document.getElementById('pure-image-viewer-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = '';
+    modal.style.opacity = '';
+    modal.style.visibility = '';
+    modal.style.pointerEvents = '';
+  }
+  document.body.style.overflow = '';
+}
+
 function renderNewDrops() {
   const container = document.getElementById('new-drops-grid');
   if (!container) return;
-  if (typeof KICKVAULT_PRODUCTS === 'undefined' || !Array.isArray(KICKVAULT_PRODUCTS)) {
-    container.innerHTML = `<p style="color: var(--text-muted); padding: 20px;">Cargando catálogo KICKVAULT...</p>`;
-    return;
-  }
-
-  const newProducts = KICKVAULT_PRODUCTS.filter(p => p.isNew || p.id === 'kv-01' || p.id === 'kv-03' || p.id === 'kv-05' || p.id === 'kv-06');
+  const products = getActiveProductsCatalog();
+  const newProducts = products.filter(p => p.isNew || p.id === 'kv-01' || p.id === 'kv-03' || p.id === 'kv-05' || p.id === 'kv-06');
   container.innerHTML = newProducts.map(p => createProductCardHTML(p)).join('');
 }
 
 function renderTrending() {
   const container = document.getElementById('trending-carousel');
   if (!container) return;
-  if (typeof KICKVAULT_PRODUCTS === 'undefined' || !Array.isArray(KICKVAULT_PRODUCTS)) return;
-
-  const trendingProducts = KICKVAULT_PRODUCTS.filter(p => p.isTrending || p.rating >= 4.8);
+  const products = getActiveProductsCatalog();
+  const trendingProducts = products.filter(p => p.isTrending || p.rating >= 4.8);
   container.innerHTML = trendingProducts.map(p => createProductCardHTML(p)).join('');
 }
 
@@ -290,6 +421,11 @@ function renderFavoritesDrawer() {
    CART MANAGEMENT
    ========================================================================== */
 function addToCart(product, size, qty = 1) {
+  if (!product) return;
+  if (product.isSoldOut || product.stock === 0) {
+    showToast("⚠️ Este producto está actualmente AGOTADO y no se puede agregar al carrito.");
+    return;
+  }
   const existingIndex = cart.findIndex(item => item.productId === product.id && item.size === size);
   if (existingIndex > -1) {
     cart[existingIndex].qty += qty;
@@ -298,7 +434,7 @@ function addToCart(product, size, qty = 1) {
       productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: (product.images && product.images[0]) ? product.images[0] : '',
       size: size,
       qty: qty
     });
@@ -374,8 +510,9 @@ function renderCartDrawer() {
 /* ==========================================================================
    PRODUCT DETAIL MODAL (PROMINENT SIZE SELECTION)
    ========================================================================== */
-function openProductModal(productId) {
-  const product = KICKVAULT_PRODUCTS.find(p => p.id === productId);
+function openProductModal(productId, mode = 'view') {
+  const products = getActiveProductsCatalog();
+  const product = products.find(p => p.id === productId);
   if (!product) return;
 
   currentSelectedProduct = product;
@@ -383,6 +520,11 @@ function openProductModal(productId) {
 
   const modal = document.getElementById('product-modal');
   if (!modal) return;
+
+  const container = modal.querySelector('.modal-container');
+  if (container) container.scrollTop = 0;
+
+  const isSoldOut = product.isSoldOut || product.stock === 0;
 
   // Render Thumbnails
   const thumbsContainer = document.getElementById('modal-thumbs');
@@ -396,7 +538,7 @@ function openProductModal(productId) {
   updateModalSizeDisplay();
 
   const mainImg = document.getElementById('modal-main-img');
-  if (mainImg) mainImg.src = product.images[0];
+  if (mainImg) mainImg.src = (product.images && product.images[0]) ? product.images[0] : '';
   
   const brandEl = document.getElementById('modal-brand');
   if (brandEl) brandEl.textContent = product.brand;
@@ -405,7 +547,9 @@ function openProductModal(productId) {
   if (titleEl) titleEl.textContent = product.name;
 
   const priceEl = document.getElementById('modal-price');
-  if (priceEl) priceEl.textContent = formatCOP(product.price);
+  if (priceEl) {
+    priceEl.innerHTML = `${formatCOP(product.price)} ${isSoldOut ? '<span class="badge badge-soldout" style="background: #ff2a5f; color: #fff; margin-left: 8px;">AGOTADO</span>' : ''}`;
+  }
 
   const colorEl = document.getElementById('modal-color');
   if (colorEl) colorEl.textContent = product.color;
@@ -413,8 +557,68 @@ function openProductModal(productId) {
   const descEl = document.getElementById('modal-desc');
   if (descEl) descEl.textContent = product.description;
 
+  // Handle Mode Display: 'view' (VER MODELO - NO sizes/cart) vs 'size' (VER TALLAS - shows sizes/cart)
+  const sizeBox = document.getElementById('modal-size-box');
+  const openSizesBtn = document.getElementById('modal-open-sizes-btn');
+  const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+  if (mode === 'size') {
+    // Mode 'size': Show green size selection box & Add to Cart button
+    if (sizeBox) sizeBox.style.display = 'block';
+    if (openSizesBtn) openSizesBtn.style.display = 'none';
+    if (addCartBtn) {
+      addCartBtn.style.display = 'block';
+      if (isSoldOut) {
+        addCartBtn.disabled = true;
+        addCartBtn.textContent = 'PRODUCTO AGOTADO (SIN STOCK) ❌';
+        addCartBtn.style.background = '#2b2b2b';
+        addCartBtn.style.color = '#777';
+        addCartBtn.style.cursor = 'not-allowed';
+        addCartBtn.style.pointerEvents = 'none';
+      } else {
+        addCartBtn.disabled = false;
+        addCartBtn.textContent = 'AGREGAR AL CARRITO +';
+        addCartBtn.style.background = '';
+        addCartBtn.style.color = '';
+        addCartBtn.style.cursor = '';
+        addCartBtn.style.pointerEvents = '';
+      }
+    }
+  } else {
+    // Mode 'view': INDEPENDENT showcase mode (ONLY sneaker pictures, description, price & action button to view sizes)
+    if (sizeBox) sizeBox.style.display = 'none';
+    if (addCartBtn) addCartBtn.style.display = 'none';
+    if (openSizesBtn) {
+      if (isSoldOut) {
+        openSizesBtn.style.display = 'block';
+        openSizesBtn.disabled = true;
+        openSizesBtn.textContent = 'PRODUCTO AGOTADO ❌';
+        openSizesBtn.style.background = '#2b2b2b';
+        openSizesBtn.style.color = '#777';
+        openSizesBtn.style.cursor = 'not-allowed';
+      } else {
+        openSizesBtn.style.display = 'block';
+        openSizesBtn.disabled = false;
+        openSizesBtn.textContent = 'VER TALLAS Y COMPRAR 🛒';
+        openSizesBtn.style.background = '';
+        openSizesBtn.style.color = '';
+        openSizesBtn.style.cursor = '';
+      }
+    }
+  }
+
   modal.classList.add('active');
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.visibility = 'visible';
+  modal.style.pointerEvents = 'auto';
   document.body.style.overflow = 'hidden';
+}
+
+function switchModalToSizeMode() {
+  if (currentSelectedProduct) {
+    openProductModal(currentSelectedProduct.id, 'size');
+  }
 }
 
 function updateModalSizeDisplay() {
@@ -452,13 +656,23 @@ function selectModalSize(size, chipEl) {
 
 function addCurrentModalToCart() {
   if (!currentSelectedProduct) return;
+  if (currentSelectedProduct.isSoldOut || currentSelectedProduct.stock === 0) {
+    showToast("⚠️ Este modelo se encuentra AGOTADO y no se puede comprar.");
+    return;
+  }
   addToCart(currentSelectedProduct, currentSelectedSize, 1);
   closeProductModal();
 }
 
 function closeProductModal() {
   const modal = document.getElementById('product-modal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = '';
+    modal.style.opacity = '';
+    modal.style.visibility = '';
+    modal.style.pointerEvents = '';
+  }
   document.body.style.overflow = '';
 }
 
@@ -681,15 +895,34 @@ function performSearch(query) {
   if (!container) return;
 
   const q = (query || '').toLowerCase().trim();
-  const filtered = (KICKVAULT_PRODUCTS || []).filter(p => 
-    p.name.toLowerCase().includes(q) ||
-    p.brand.toLowerCase().includes(q) ||
-    p.color.toLowerCase().includes(q) ||
-    p.style.toLowerCase().includes(q)
-  );
+  const sizeMatch = q.match(/\b(3[6-9]|4[0-6])\b/);
+  const targetSize = sizeMatch ? parseInt(sizeMatch[1], 10) : null;
+
+  // Update active pill state
+  document.querySelectorAll('.search-filter-pills .filter-pill').forEach(pill => {
+    const pillText = pill.textContent.toLowerCase().trim();
+    if (pillText === q || (q === '' && pillText === 'todas') || (targetSize && pillText.includes(targetSize.toString()))) {
+      pill.classList.add('active');
+    } else {
+      pill.classList.remove('active');
+    }
+  });
+
+  const products = getActiveProductsCatalog();
+  const filtered = products.filter(p => {
+    const matchesText = 
+      p.name.toLowerCase().includes(q) ||
+      p.brand.toLowerCase().includes(q) ||
+      p.color.toLowerCase().includes(q) ||
+      (p.style && p.style.toLowerCase().includes(q));
+
+    const matchesSize = targetSize ? (Array.isArray(p.sizes) && p.sizes.includes(targetSize)) : false;
+
+    return matchesText || matchesSize;
+  });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No se encontraron resultados para "${query}". Pruebe con "Air Max", "Cyber" o "Negro".</p>`;
+    container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No se encontraron resultados para "${query}". Pruebe con una talla (ej. 39, 41, 42) o modelo ("Air Max", "Cyber").</p>`;
   } else {
     container.innerHTML = filtered.map(p => createProductCardHTML(p)).join('');
   }
@@ -712,13 +945,48 @@ function closeTrackingModal() {
   document.body.style.overflow = '';
 }
 
+/* ==========================================================================
+   ORDERS MANAGEMENT & ADMIN DASHBOARD
+   ========================================================================== */
+const ORDERS_STORAGE_KEY = 'kickvault_all_orders_v1';
+
+function loadAllOrders() {
+  try {
+    const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+    let stored = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(stored)) stored = [];
+    
+    // Merge sample orders if not present
+    const sampleKeys = Object.keys(SAMPLE_ORDERS || {});
+    sampleKeys.forEach(k => {
+      if (!stored.some(o => o.orderId === k)) {
+        stored.push(SAMPLE_ORDERS[k]);
+      }
+    });
+    
+    return stored;
+  } catch (e) {
+    console.warn("KICKVAULT: Error leyendo historial de pedidos:", e);
+    return [];
+  }
+}
+
+function saveAllOrders(ordersList) {
+  try {
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(ordersList));
+  } catch (e) {
+    console.error("Error guardando historial de pedidos:", e);
+  }
+}
+
 function searchOrderTracking() {
   const inputEl = document.getElementById('tracking-input');
   const input = inputEl ? inputEl.value.trim().toUpperCase() : 'KV-1048';
   const resultBox = document.getElementById('tracking-result-box');
   if (!resultBox) return;
 
-  const orderData = (typeof SAMPLE_ORDERS !== 'undefined' && SAMPLE_ORDERS[input]) || {
+  const allOrders = loadAllOrders();
+  const orderData = allOrders.find(o => o.orderId === input) || {
     orderId: input || "KV-1048",
     customer: "Cliente KICKVAULT",
     date: "Hoy",
@@ -743,7 +1011,7 @@ function searchOrderTracking() {
           <h4 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--neon-green);">Nº ${orderData.orderId}</h4>
           <p style="font-size: 0.85rem; color: var(--text-muted);">Cliente: ${orderData.customer} · ${orderData.date}</p>
         </div>
-        <span class="badge badge-neon">${orderData.trackingCarrier}</span>
+        <span class="badge badge-neon">${orderData.trackingCarrier || 'KICKVAULT Express'}</span>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; margin: 30px 0;">
@@ -768,25 +1036,210 @@ function searchOrderTracking() {
   `;
 }
 
-/* ==========================================================================
-   CHECKOUT SIMULATION
-   ========================================================================== */
 function processCheckout() {
   if (cart.length === 0) return;
+  closeCartDrawer();
+  openCheckoutModal();
+}
+
+function openCheckoutModal() {
+  const modal = document.getElementById('checkout-form-modal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeCheckoutModal() {
+  const modal = document.getElementById('checkout-form-modal');
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function submitCheckoutOrder(e) {
+  if (e) e.preventDefault();
+  if (cart.length === 0) return;
+
+  const name = document.getElementById('checkout-name')?.value.trim() || "";
+  const phone = document.getElementById('checkout-phone')?.value.trim() || "";
+  const email = document.getElementById('checkout-email')?.value.trim() || "";
+  const city = document.getElementById('checkout-city')?.value.trim() || "";
+  const neighborhood = document.getElementById('checkout-neighborhood')?.value.trim() || "";
+  const address = document.getElementById('checkout-address')?.value.trim() || "";
+  const notes = document.getElementById('checkout-notes')?.value.trim() || "";
+
+  if (!name || !phone || !email || !city || !address) {
+    showToast("Por favor completa todos los campos requeridos para enviar tu pedido");
+    return;
+  }
 
   const orderNum = 'KV-' + Math.floor(1000 + Math.random() * 9000);
-  
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
+  const fullAddressStr = `${address}${neighborhood ? ' (' + neighborhood + ')' : ''}, ${city}`;
+
+  const newOrder = {
+    orderId: orderNum,
+    customer: name,
+    phone: phone,
+    email: email,
+    city: city,
+    neighborhood: neighborhood,
+    address: fullAddressStr,
+    notes: notes,
+    date: dateStr,
+    statusStep: 1,
+    statusText: "Pedido recibido y confirmado en sistema KICKVAULT",
+    trackingCarrier: "Servientrega Express",
+    totalPrice: formatCOP(totalAmount),
+    totalPriceNum: totalAmount,
+    items: cart.map(item => ({
+      name: item.name,
+      size: item.size || 41,
+      price: formatCOP(item.price),
+      qty: item.qty || 1
+    }))
+  };
+
+  // Save to persistent storage for Admin
+  const allOrders = loadAllOrders();
+  allOrders.unshift(newOrder);
+  saveAllOrders(allOrders);
+
+  // Clear cart & reset form
   cart = [];
   saveCart();
-  closeCartDrawer();
+  closeCheckoutModal();
 
-  showToast(`¡Pedido ${orderNum} realizado con éxito! 🔥`);
-  
-  // Show Receipt Tracker
+  const formEl = document.getElementById('checkout-form');
+  if (formEl) formEl.reset();
+
+  showToast(`¡Pedido ${orderNum} registrado con éxito! 🔥`);
+
+  // Open Order Tracking Modal for Customer
   openTrackingModal();
   const inputEl = document.getElementById('tracking-input');
   if (inputEl) inputEl.value = orderNum;
   searchOrderTracking();
+}
+
+function openAdminOrdersModal(e) {
+  if (e) e.preventDefault();
+  const modal = document.getElementById('admin-orders-modal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    renderAdminOrdersList();
+  }
+}
+
+function closeAdminOrdersModal() {
+  const modal = document.getElementById('admin-orders-modal');
+  if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function renderAdminOrdersList() {
+  const listEl = document.getElementById('admin-orders-list');
+  const countEl = document.getElementById('admin-total-orders-count');
+  const salesEl = document.getElementById('admin-total-sales-sum');
+  const pendingEl = document.getElementById('admin-pending-orders-count');
+  if (!listEl) return;
+
+  const orders = loadAllOrders();
+
+  let totalSales = 0;
+  let pendingCount = 0;
+
+  orders.forEach(o => {
+    if (o.totalPriceNum) totalSales += o.totalPriceNum;
+    if (o.statusStep < 4) pendingCount++;
+  });
+
+  if (countEl) countEl.textContent = orders.length;
+  if (salesEl) salesEl.textContent = formatCOP(totalSales);
+  if (pendingEl) pendingEl.textContent = pendingCount;
+
+  if (orders.length === 0) {
+    listEl.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 40px;">No hay pedidos registrados en el sistema.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = orders.map(order => `
+    <div style="background: #141414; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+        <div>
+          <span style="color: var(--neon-green); font-family: var(--font-heading); font-size: 1.4rem;">Nº ${order.orderId}</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 10px;">${order.date}</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background: #222; color: var(--neon-green); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">
+            <option value="1" ${order.statusStep == 1 ? 'selected' : ''}>1. Confirmado</option>
+            <option value="2" ${order.statusStep == 2 ? 'selected' : ''}>2. En Preparación</option>
+            <option value="3" ${order.statusStep == 3 ? 'selected' : ''}>3. En Camino</option>
+            <option value="4" ${order.statusStep == 4 ? 'selected' : ''}>4. Entregado</option>
+          </select>
+          <button onclick="deleteOrderAdmin('${order.orderId}')" style="color: #ff4444; font-size: 0.8rem; text-decoration: underline; background: none; border: none; cursor: pointer;">Eliminar</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; font-size: 0.88rem;">
+        <div>
+          <p style="color: #fff; font-weight: 700;">👤 Cliente: ${order.customer}</p>
+          <p style="color: #bbb;">📱 Teléfono: ${order.phone || 'No registrado'}</p>
+          <p style="color: #bbb;">🏠 Dirección: ${order.address}</p>
+        </div>
+        <div>
+          <p style="color: var(--neon-green); font-weight: 800; font-size: 1.1rem;">Total: ${order.totalPrice || '$0 COP'}</p>
+          <p style="color: #aaa; font-size: 0.82rem;">📍 Estado: ${order.statusText}</p>
+        </div>
+      </div>
+
+      <div style="background: #090909; padding: 10px; border-radius: var(--radius-sm); font-size: 0.85rem;">
+        <span style="font-weight: 700; color: var(--neon-green);">Productos comprados:</span>
+        <ul style="margin-left: 18px; color: #ddd; margin-top: 4px;">
+          ${(order.items || []).map(i => `<li>${i.name} — <strong>Talla ${i.size} EUR</strong> (x${i.qty || 1}) - ${i.price}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateOrderStatus(orderId, newStep) {
+  const orders = loadAllOrders();
+  const target = orders.find(o => o.orderId === orderId);
+  if (!target) return;
+
+  const step = parseInt(newStep, 10);
+  target.statusStep = step;
+
+  const statusTexts = {
+    1: "Pedido recibido y confirmado en sistema KICKVAULT",
+    2: "Preparando pedido en bodega principal KICKVAULT",
+    3: "En tránsito - Pedido enviado con la transportadora",
+    4: "Pedido entregado satisfactoriamente al cliente"
+  };
+
+  target.statusText = statusTexts[step] || target.statusText;
+  saveAllOrders(orders);
+  renderAdminOrdersList();
+  showToast(`Estado del pedido ${orderId} actualizado`);
+}
+
+function deleteOrderAdmin(orderId) {
+  let orders = loadAllOrders();
+  orders = orders.filter(o => o.orderId !== orderId);
+  saveAllOrders(orders);
+  renderAdminOrdersList();
+  showToast(`Pedido ${orderId} eliminado`);
+}
+
+function clearTestOrders() {
+  saveAllOrders([]);
+  renderAdminOrdersList();
+  showToast("Historial de pedidos limpiado");
 }
 
 /* ==========================================================================

@@ -9,8 +9,8 @@
   <title>KICKVAULT | Tu Estilo. Tu Zapatilla. Tu Momento.</title>
   <meta name="description" content="KICKVAULT es la tienda de zapatillas urbanas y lanzamientos exclusivos número uno. Descubre los modelos más buscados y encuentra tu estilo único.">
   
-  <!-- CSS Stylesheet with strict cache busting v20260817-FINAL-3 -->
-  <link rel="stylesheet" href="css/styles.css?v=20260817-FINAL-3">
+  <!-- CSS Stylesheet with strict cache busting v20260828-INDEPENDENT-MODES-FIX -->
+  <link rel="stylesheet" href="css/styles.css?v=20260828-INDEPENDENT-MODES-FIX">
 </head>
 <body>
 
@@ -353,7 +353,7 @@
           <h4>SOPORTE</h4>
           <ul class="footer-links">
             <li><a href="#" onclick="openTrackingModal()">Seguimiento de Pedido</a></li>
-            <li><a href="#" onclick="showSizeGuideToast()">Guía de Tallas 📏</a></li>
+            <li><a href="#" onclick="openSizeGuideModal(event)">Guía de Tallas 📏</a></li>
             <li><a href="#">Políticas de Envío</a></li>
             <li><a href="#">Cambios y Devoluciones</a></li>
           </ul>
@@ -401,21 +401,30 @@
           <p id="modal-color" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">Colorway</p>
           <div id="modal-price" class="product-price" style="font-size: 2.2rem; color: var(--neon-green); margin-bottom: 20px;">$0 COP</div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 8px;">
-            <label style="font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">
-              ELIGE TU TALLA: <span id="selected-size-label" style="color: var(--neon-green); font-weight: 800; font-size: 0.95rem;">41 EUR</span>
-            </label>
-            <button type="button" onclick="showSizeGuideToast()" style="font-size: 0.8rem; color: var(--neon-green); text-decoration: underline; background: none; border: none; cursor: pointer;">
-              Guía de tallas 📏
-            </button>
-          </div>
-          <div id="modal-size-selector" class="size-selector">
-            <!-- Injected -->
+          <p id="modal-desc" style="color: #bbb; font-size: 0.92rem; line-height: 1.6; margin-bottom: 20px;"></p>
+
+          <!-- SIZE SELECTION BOX (ONLY SHOWN IN 'VER TALLAS' MODE) -->
+          <div id="modal-size-box" style="background: rgba(183, 255, 0, 0.05); border: 1.5px solid var(--border-active); padding: 18px; border-radius: var(--radius-md); margin-bottom: 20px; box-shadow: 0 0 15px rgba(183, 255, 0, 0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label style="font-weight: 800; font-size: 0.9rem; letter-spacing: 1px; color: #fff;">
+                SELECCIONA TU TALLA: <span id="selected-size-label" style="color: var(--neon-green); font-weight: 800; font-size: 1.05rem;">41 EUR</span>
+              </label>
+              <button type="button" onclick="openSizeGuideModal(event)" style="font-size: 0.82rem; color: var(--neon-green); text-decoration: underline; background: none; border: none; cursor: pointer; font-weight: 700;">
+                Tabla de Medidas 📏
+              </button>
+            </div>
+            <div id="modal-size-selector" class="size-selector" style="margin: 0;">
+              <!-- Injected -->
+            </div>
           </div>
 
-          <p id="modal-desc" style="color: #bbb; font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px;"></p>
+          <!-- ACTION BUTTON: SWITCH TO SIZE SELECTION (SHOWN IN 'VER MODELO' MODE) -->
+          <button id="modal-open-sizes-btn" class="btn btn-primary btn-block" onclick="switchModalToSizeMode()" style="font-size: 1.1rem; padding: 18px; margin-bottom: 16px;">
+            VER TALLAS Y COMPRAR 🛒
+          </button>
 
-          <button class="btn btn-primary btn-block" onclick="addCurrentModalToCart()" style="font-size: 1.1rem; padding: 18px;">
+          <!-- ACTION BUTTON: ADD TO CART (SHOWN IN 'VER TALLAS' MODE) -->
+          <button id="modal-add-cart-btn" class="btn btn-primary btn-block" onclick="addCurrentModalToCart()" style="font-size: 1.1rem; padding: 18px;">
             AGREGAR AL CARRITO +
           </button>
 
@@ -425,6 +434,53 @@
             <span>🔒 Compra segura</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIZE GUIDE MODAL OVERLAY -->
+  <div id="size-guide-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 750px;">
+      <button class="modal-close-btn" onclick="closeSizeGuideModal()">✕</button>
+
+      <div style="text-align: center; margin-bottom: 24px;">
+        <span class="badge badge-neon" style="margin-bottom: 8px;">GUÍA DE MEDIDAS EXCLUSIVA</span>
+        <h2 class="section-title" style="font-size: 2.2rem;">TABLA OFICIAL DE TALLAS 📏</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Mide tu pie desde el talón hasta el dedo más largo para encontrar tu ajuste perfecto.</p>
+      </div>
+
+      <div style="overflow-x: auto; margin-bottom: 24px;">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>TALLA (EUR)</th>
+              <th>CENTÍMETROS (CM)</th>
+              <th>US HOMBRE</th>
+              <th>US MUJER</th>
+              <th>UK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>38</strong></td><td>24.0 cm</td><td>6.0</td><td>7.5</td><td>5.5</td></tr>
+            <tr><td><strong>39</strong></td><td>24.5 cm</td><td>6.5</td><td>8.0</td><td>6.0</td></tr>
+            <tr><td><strong>40</strong></td><td>25.0 cm</td><td>7.5</td><td>9.0</td><td>7.0</td></tr>
+            <tr><td><strong>41</strong></td><td>26.0 cm</td><td>8.5</td><td>10.0</td><td>8.0</td></tr>
+            <tr><td><strong>42</strong></td><td>26.5 cm</td><td>9.0</td><td>10.5</td><td>8.5</td></tr>
+            <tr><td><strong>43</strong></td><td>27.5 cm</td><td>10.0</td><td>11.5</td><td>9.5</td></tr>
+            <tr><td><strong>44</strong></td><td>28.5 cm</td><td>11.0</td><td>12.5</td><td>10.5</td></tr>
+            <tr><td><strong>45</strong></td><td>29.0 cm</td><td>11.5</td><td>13.0</td><td>11.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="size-guide-tips" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 18px; border-radius: var(--radius-md);">
+        <h4 style="color: var(--neon-green); margin-bottom: 8px; font-size: 0.95rem; font-family: var(--font-heading); letter-spacing: 1px;">💡 ¿CÓMO MEDIR TU PIE DE FORMA EXACTA?</h4>
+        <ol style="margin-left: 20px; color: #ccc; font-size: 0.88rem; line-height: 1.6;">
+          <li>Coloca una hoja de papel en el suelo pegada a la pared.</li>
+          <li>Párate sobre la hoja con el talón tocando suavemente la pared.</li>
+          <li>Marca con un lápiz el punto más lejano de tu dedo más largo.</li>
+          <li>Mide la distancia en centímetros y compara con la tabla de arriba. Si estás entre dos tallas, te recomendamos elegir la más grande.</li>
+        </ol>
       </div>
     </div>
   </div>
@@ -482,10 +538,13 @@
 
       <div class="search-filter-pills">
         <span class="filter-pill active" onclick="performSearch('')">Todas</span>
+        <span class="filter-pill" onclick="performSearch('39')">Talla 39</span>
+        <span class="filter-pill" onclick="performSearch('40')">Talla 40</span>
+        <span class="filter-pill" onclick="performSearch('41')">Talla 41</span>
+        <span class="filter-pill" onclick="performSearch('42')">Talla 42</span>
+        <span class="filter-pill" onclick="performSearch('43')">Talla 43</span>
         <span class="filter-pill" onclick="performSearch('air max')">Air Max</span>
-        <span class="filter-pill" onclick="performSearch('verde')">Verde Neón</span>
         <span class="filter-pill" onclick="performSearch('exclusivo')">Exclusivas</span>
-        <span class="filter-pill" onclick="performSearch('negro')">Triple Black</span>
       </div>
 
       <div id="search-results-grid" class="product-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -513,10 +572,122 @@
         <!-- Injected dynamically -->
       </div>
     </div>
+  <!-- PURE IMAGE VIEWER MODAL (SOLO FOTOS Y ÁNGULOS) -->
+  <div id="pure-image-viewer-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 850px; padding: 20px; background: #0a0a0a;">
+      <button class="modal-close-btn" onclick="closePureImageViewer()">✕</button>
+
+      <div style="margin-bottom: 12px;">
+        <span id="piv-brand" class="badge badge-neon" style="margin-bottom: 4px;">KICKVAULT</span>
+        <h2 id="piv-title" class="section-title" style="font-size: 1.8rem; margin: 0;">FOTOS DEL MODELO</h2>
+      </div>
+
+      <!-- Main High-Res Image Display -->
+      <div style="aspect-ratio: 16/9; max-height: 480px; background: #000; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; padding: 0;">
+        <img id="piv-main-img" src="" alt="Foto de modelo" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+
+      <!-- Thumbnails Carousel Bar -->
+      <div id="piv-thumbs-bar" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
   </div>
 
-  <!-- JavaScript Modules with strict cache-busting v20260817-FINAL-3 -->
-  <script src="js/data.js?v=20260817-FINAL-3"></script>
-  <script src="js/app.js?v=20260817-FINAL-3"></script>
+  <!-- CHECKOUT FORM MODAL -->
+  <div id="checkout-form-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px;">
+      <button class="modal-close-btn" onclick="closeCheckoutModal()">✕</button>
+
+      <span class="badge badge-neon" style="margin-bottom: 8px;">COMPRA REAL Y DIRECTA</span>
+      <h2 class="section-title" style="font-size: 2rem; margin-bottom: 12px;">INGRESA TUS DATOS DE ENVÍO 🚚</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Escribe tu información completa para registrar tu compra y coordinar la entrega directamente.</p>
+
+      <form id="checkout-form" onsubmit="submitCheckoutOrder(event)">
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">NOMBRE COMPLETO *</label>
+            <input type="text" id="checkout-name" class="search-input-field" placeholder="Escribe tu nombre y apellido" value="" required style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">TELÉFONO / WHATSAPP *</label>
+              <input type="tel" id="checkout-phone" class="search-input-field" placeholder="Número de contacto" value="" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">CORREO ELECTRÓNICO *</label>
+              <input type="email" id="checkout-email" class="search-input-field" placeholder="tu@email.com" value="" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">CIUDAD / MUNICIPIO *</label>
+              <input type="text" id="checkout-city" class="search-input-field" placeholder="Ej. Bogotá, Medellín, Cali" value="" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">BARRIO *</label>
+              <input type="text" id="checkout-neighborhood" class="search-input-field" placeholder="Ej. Chapinero, El Poblado" value="" required style="font-size: 0.95rem; padding: 12px;">
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">DIRECCIÓN EXACTA (CASA / APTO / BLOQUE) *</label>
+            <input type="text" id="checkout-address" class="search-input-field" placeholder="Ej. Calle 100 #15-32 Apto 402" value="" required style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; color: #ccc;">NOTAS ADICIONALES (OPCIONAL)</label>
+            <input type="text" id="checkout-notes" class="search-input-field" placeholder="Ej. Dejar en portería, timbrar en el 402..." value="" style="font-size: 0.95rem; padding: 12px;">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="font-size: 1.05rem; padding: 16px;">
+          CONFIRMAR PEDIDO Y ENVIAR 🚀
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN ORDERS DASHBOARD MODAL -->
+  <div id="admin-orders-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 950px;">
+      <button class="modal-close-btn" onclick="closeAdminOrdersModal()">✕</button>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+        <div>
+          <span class="badge badge-neon" style="margin-bottom: 6px;">PANEL DE ADMINISTRACIÓN</span>
+          <h2 class="section-title" style="font-size: 2rem;">HISTORIAL DE PEDIDOS RECIBIDOS 📋</h2>
+        </div>
+        <button class="btn btn-secondary" onclick="clearTestOrders()" style="font-size: 0.8rem; padding: 8px 14px;">Vaciar Pruebas</button>
+      </div>
+
+      <!-- Stats Summary Row -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+          <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Total de Pedidos</span>
+          <h3 id="admin-total-orders-count" style="font-size: 1.8rem; color: var(--neon-green); font-family: var(--font-heading); margin-top: 4px;">0</h3>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+          <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Ventas Acumuladas</span>
+          <h3 id="admin-total-sales-sum" style="font-size: 1.8rem; color: #fff; font-family: var(--font-heading); margin-top: 4px;">$0 COP</h3>
+        </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); text-align: center;">
+          <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Pedidos Pendientes</span>
+          <h3 id="admin-pending-orders-count" style="font-size: 1.8rem; color: #ff2a5f; font-family: var(--font-heading); margin-top: 4px;">0</h3>
+        </div>
+      </div>
+
+      <!-- Orders List Container -->
+      <div id="admin-orders-list" style="display: flex; flex-direction: column; gap: 16px; max-height: 50vh; overflow-y: auto; padding-right: 6px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Modules with strict cache-busting v20260828-INDEPENDENT-MODES-FIX -->
+  <script src="js/data.js?v=20260828-INDEPENDENT-MODES-FIX"></script>
+  <script src="js/app.js?v=20260828-INDEPENDENT-MODES-FIX"></script>
 </body>
 </html>
