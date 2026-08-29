@@ -12,7 +12,7 @@
   <!-- Automatic Fresh Version Enforcer -->
   <script>
     (function() {
-      const VER = '400000';
+      const VER = '500000';
       if (localStorage.getItem('kv_cache_ver') !== VER) {
         localStorage.setItem('kv_cache_ver', VER);
         if ('serviceWorker' in navigator) {
@@ -27,8 +27,8 @@
     })();
   </script>
 
-  <!-- CSS Stylesheet with strict cache busting vCART-FLOW-ADJUSTED-400000 -->
-  <link rel="stylesheet" href="css/styles.css?v=CART-FLOW-ADJUSTED-400000">
+  <!-- CSS Stylesheet with strict cache busting vEXACT-DATOS-ENVIO-MODAL-500000 -->
+  <link rel="stylesheet" href="css/styles.css?v=EXACT-DATOS-ENVIO-MODAL-500000">
 </head>
 <body>
 
@@ -741,6 +741,70 @@
     </div>
   </div>
 
+  <!-- DATOS DE ENVÍO MODAL (MATCHING USER SCREENSHOT EXACTLY) -->
+  <div id="checkout-form-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 600px; padding: 32px;">
+      <button class="modal-close-btn" onclick="closeCheckoutModal()">✕</button>
+
+      <h2 style="font-family: var(--font-heading); font-size: 2.2rem; letter-spacing: 1px; color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        DATOS DE ENVÍO 🚚
+      </h2>
+
+      <div style="background: rgba(183, 255, 0, 0.05); border: 1.5px solid var(--neon-green); padding: 18px; border-radius: var(--radius-md); margin-bottom: 24px;">
+        <span class="badge badge-neon" style="margin-bottom: 8px;">COMPRA REAL KICKVAULT</span>
+        <h4 style="font-size: 1.15rem; color: #fff; margin: 4px 0 6px 0; font-weight: 800;">INGRESA TUS DATOS DE ENTREGA 🚚</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Escribe tu información completa para registrar tu pedido en el sistema.</p>
+      </div>
+
+      <form id="standalone-checkout-form" onsubmit="submitCheckoutOrder(event)" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">NOMBRE COMPLETO *</label>
+          <input type="text" id="co-name" class="search-input-field" placeholder="Escribe tu nombre y apellido" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">TELÉFONO / WHATSAPP *</label>
+            <input type="tel" id="co-phone" class="search-input-field" placeholder="Número de contacto" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">CORREO ELECTRÓNICO *</label>
+            <input type="email" id="co-email" class="search-input-field" placeholder="tu@email.com" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">CIUDAD / MUNICIPIO *</label>
+            <input type="text" id="co-city" class="search-input-field" placeholder="Ej. Bogotá, Medellín" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">BARRIO *</label>
+            <input type="text" id="co-neighborhood" class="search-input-field" placeholder="Ej. Chapinero" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">DIRECCIÓN EXACTA (CASA / APTO) *</label>
+          <input type="text" id="co-address" class="search-input-field" placeholder="Ej. Calle 100 #15-32 Apto 402" required style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px; color: #ccc;">NOTAS ADICIONALES (OPCIONAL)</label>
+          <input type="text" id="co-notes" class="search-input-field" placeholder="Ej. Dejar en portería..." style="font-size: 0.95rem; padding: 12px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="font-size: 1.05rem; padding: 16px; margin-top: 8px;">
+          CONFIRMAR PEDIDO Y ENVIAR 🚀
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-block" onclick="closeCheckoutModal(); openCartDrawer();" style="font-size: 0.9rem; padding: 12px; border-color: #444;">
+          ← VOLVER A VER EL CARRITO
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- CART DRAWER -->
   <div id="cart-drawer-overlay" class="drawer-overlay">
     <div class="drawer-panel">
@@ -942,8 +1006,8 @@
     </div>
   </div>
 
-  <!-- JavaScript Modules with strict cache-busting vCART-FLOW-ADJUSTED-400000 -->
-  <script src="js/data.js?v=CART-FLOW-ADJUSTED-400000"></script>
-  <script src="js/app.js?v=CART-FLOW-ADJUSTED-400000"></script>
+  <!-- JavaScript Modules with strict cache-busting vEXACT-DATOS-ENVIO-MODAL-500000 -->
+  <script src="js/data.js?v=EXACT-DATOS-ENVIO-MODAL-500000"></script>
+  <script src="js/app.js?v=EXACT-DATOS-ENVIO-MODAL-500000"></script>
 </body>
 </html>

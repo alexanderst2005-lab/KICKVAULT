@@ -515,7 +515,31 @@ function renderCartDrawer() {
 }
 
 function processCheckout() {
+  openCheckoutModal();
   openCheckoutInDrawer();
+}
+
+function openCheckoutModal() {
+  if (cart.length === 0) {
+    showToast("⚠️ Tu carrito de compras está vacío. Agrega una zapatilla primero.");
+    return;
+  }
+  closeCartDrawer();
+  const modal = document.getElementById('checkout-form-modal');
+  if (modal) {
+    modal.classList.add('active');
+    modal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 999999 !important;';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeCheckoutModal() {
+  const modal = document.getElementById('checkout-form-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.cssText = 'display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;';
+  }
+  document.body.style.overflow = '';
 }
 
 function openCheckoutInDrawer() {
@@ -523,6 +547,8 @@ function openCheckoutInDrawer() {
     showToast("⚠️ Tu carrito de compras está vacío. Agrega una zapatilla primero.");
     return;
   }
+  openCheckoutModal();
+
   const container = document.getElementById('cart-items-container');
   const footer = document.querySelector('#cart-drawer-overlay .drawer-footer');
   const headerTitle = document.querySelector('#cart-drawer-overlay .drawer-header h3');
@@ -537,7 +563,7 @@ function openCheckoutInDrawer() {
         <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Escribe tu información completa para registrar tu pedido en el sistema.</p>
       </div>
 
-      <form id="drawer-checkout-form" onsubmit="submitDrawerCheckoutOrder(event)" style="display: flex; flex-direction: column; gap: 10px;">
+      <form id="drawer-checkout-form" onsubmit="submitCheckoutOrder(event)" style="display: flex; flex-direction: column; gap: 10px;">
         <div>
           <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">NOMBRE COMPLETO *</label>
           <input type="text" id="drawer-checkout-name" class="search-input-field" placeholder="Escribe tu nombre y apellido" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
@@ -591,17 +617,17 @@ function openCheckoutInDrawer() {
   }
 }
 
-function submitDrawerCheckoutOrder(e) {
+function submitCheckoutOrder(e) {
   if (e) e.preventDefault();
   if (cart.length === 0) return;
 
-  const name = document.getElementById('drawer-checkout-name')?.value.trim() || "";
-  const phone = document.getElementById('drawer-checkout-phone')?.value.trim() || "";
-  const email = document.getElementById('drawer-checkout-email')?.value.trim() || "";
-  const city = document.getElementById('drawer-checkout-city')?.value.trim() || "";
-  const neighborhood = document.getElementById('drawer-checkout-neighborhood')?.value.trim() || "";
-  const address = document.getElementById('drawer-checkout-address')?.value.trim() || "";
-  const notes = document.getElementById('drawer-checkout-notes')?.value.trim() || "";
+  const name = document.getElementById('co-name')?.value.trim() || document.getElementById('drawer-checkout-name')?.value.trim() || "";
+  const phone = document.getElementById('co-phone')?.value.trim() || document.getElementById('drawer-checkout-phone')?.value.trim() || "";
+  const email = document.getElementById('co-email')?.value.trim() || document.getElementById('drawer-checkout-email')?.value.trim() || "";
+  const city = document.getElementById('co-city')?.value.trim() || document.getElementById('drawer-checkout-city')?.value.trim() || "";
+  const neighborhood = document.getElementById('co-neighborhood')?.value.trim() || document.getElementById('drawer-checkout-neighborhood')?.value.trim() || "";
+  const address = document.getElementById('co-address')?.value.trim() || document.getElementById('drawer-checkout-address')?.value.trim() || "";
+  const notes = document.getElementById('co-notes')?.value.trim() || document.getElementById('drawer-checkout-notes')?.value.trim() || "";
 
   if (!name || !phone || !email || !city || !address) {
     showToast("Por favor completa todos los campos requeridos para enviar tu pedido");
@@ -638,24 +664,26 @@ function submitDrawerCheckoutOrder(e) {
     }))
   };
 
-  // Save to persistent storage for Admin Panel
   const allOrders = loadAllOrders();
   allOrders.unshift(newOrder);
   saveAllOrders(allOrders);
 
-  // Clear cart & reset drawer
   cart = [];
   saveCart();
   closeCartDrawer();
+  closeCheckoutModal();
   renderCartDrawer();
 
   showToast(`¡Pedido ${orderNum} registrado con éxito! 🔥`);
 
-  // Open Order Tracking Timeline Modal
   openTrackingModal();
   const inputEl = document.getElementById('tracking-input');
   if (inputEl) inputEl.value = orderNum;
   searchOrderTracking();
+}
+
+function submitDrawerCheckoutOrder(e) {
+  submitCheckoutOrder(e);
 }
 
 function updateModalSizeDisplay() {
