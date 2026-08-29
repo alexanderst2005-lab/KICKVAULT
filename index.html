@@ -9,8 +9,26 @@
   <title>KICKVAULT | Tu Estilo. Tu Zapatilla. Tu Momento.</title>
   <meta name="description" content="KICKVAULT es la tienda de zapatillas urbanas y lanzamientos exclusivos número uno. Descubre los modelos más buscados y encuentra tu estilo único.">
   
-  <!-- CSS Stylesheet with strict cache busting vPROCESS-CHECKOUT-RESOLVED-100000 -->
-  <link rel="stylesheet" href="css/styles.css?v=PROCESS-CHECKOUT-RESOLVED-100000">
+  <!-- Automatic Fresh Version Enforcer -->
+  <script>
+    (function() {
+      const VER = '200000';
+      if (localStorage.getItem('kv_cache_ver') !== VER) {
+        localStorage.setItem('kv_cache_ver', VER);
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            for (let reg of regs) reg.unregister();
+          });
+        }
+        if (!window.location.search.includes('v=' + VER)) {
+          window.location.href = window.location.pathname + '?v=' + VER;
+        }
+      }
+    })();
+  </script>
+
+  <!-- CSS Stylesheet with strict cache busting vFORCE-RELOAD-EVERYTHING-200000 -->
+  <link rel="stylesheet" href="css/styles.css?v=FORCE-RELOAD-EVERYTHING-200000">
 </head>
 <body>
 
@@ -924,8 +942,8 @@
     </div>
   </div>
 
-  <!-- JavaScript Modules with strict cache-busting vPROCESS-CHECKOUT-RESOLVED-100000 -->
-  <script src="js/data.js?v=PROCESS-CHECKOUT-RESOLVED-100000"></script>
-  <script src="js/app.js?v=PROCESS-CHECKOUT-RESOLVED-100000"></script>
+  <!-- JavaScript Modules with strict cache-busting vFORCE-RELOAD-EVERYTHING-200000 -->
+  <script src="js/data.js?v=FORCE-RELOAD-EVERYTHING-200000"></script>
+  <script src="js/app.js?v=FORCE-RELOAD-EVERYTHING-200000"></script>
 </body>
 </html>
