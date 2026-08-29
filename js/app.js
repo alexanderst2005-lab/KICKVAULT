@@ -654,6 +654,33 @@ function submitDrawerCheckoutOrder(e) {
   searchOrderTracking();
 }
 
+function updateModalSizeDisplay() {
+  if (!currentSelectedProduct) return;
+
+  const labelEl = document.getElementById('selected-size-label');
+  if (labelEl) {
+    labelEl.textContent = `${currentSelectedSize} EUR`;
+  }
+
+  const chipsContainer = document.getElementById('modal-size-selector');
+  if (chipsContainer) {
+    const availableSizes = currentSelectedProduct.sizes || [38, 39, 40, 41, 42, 43, 44];
+    chipsContainer.innerHTML = availableSizes.map(sz => `
+      <button class="size-chip ${sz === currentSelectedSize ? 'selected' : ''}" onclick="selectModalSize(${sz}, this)" style="padding: 10px 14px; font-size: 0.9rem; font-weight: 700; border-radius: 8px; border: 1.5px solid ${sz === currentSelectedSize ? 'var(--neon-green)' : '#333'}; background: ${sz === currentSelectedSize ? 'var(--neon-green)' : '#1a1a1a'}; color: ${sz === currentSelectedSize ? '#000' : '#fff'}; cursor: pointer;">
+        ${sz}
+      </button>
+    `).join('');
+  }
+}
+
+function selectModalSize(size, chipEl) {
+  currentSelectedSize = size;
+  if (currentSelectedProduct) {
+    currentSelectedProduct._selectedSize = size;
+  }
+  updateModalSizeDisplay();
+}
+
 /* ==========================================================================
    PRODUCT DETAIL MODAL (PROMINENT SIZE SELECTION)
    ========================================================================== */
