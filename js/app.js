@@ -831,7 +831,6 @@ function addCurrentModalToCart() {
   addToCart(currentSelectedProduct, currentSelectedSize, 1);
   closeProductModal();
   openCartDrawer();
-  openCheckoutInDrawer();
 }
 
 function closeProductModal() {
