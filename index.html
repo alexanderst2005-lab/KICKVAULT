@@ -9,8 +9,8 @@
   <title>KICKVAULT | Tu Estilo. Tu Zapatilla. Tu Momento.</title>
   <meta name="description" content="KICKVAULT es la tienda de zapatillas urbanas y lanzamientos exclusivos número uno. Descubre los modelos más buscados y encuentra tu estilo único.">
   
-  <!-- CSS Stylesheet with strict cache busting vSTATIC-HTML-PRODUCTS-GUARANTEE-999 -->
-  <link rel="stylesheet" href="css/styles.css?v=STATIC-HTML-PRODUCTS-GUARANTEE-999">
+  <!-- CSS Stylesheet with strict cache busting vMOBILE-RESPONSIVE-AND-SELECTION-FIX-1000 -->
+  <link rel="stylesheet" href="css/styles.css?v=MOBILE-RESPONSIVE-AND-SELECTION-FIX-1000">
 </head>
 <body>
 
@@ -469,7 +469,12 @@
 
         <!-- Dynamic Content -->
         <div id="quiz-step-content">
-          <!-- Injected via app.js -->
+          <h3 style="font-family: var(--font-heading); font-size: 1.8rem; text-align: center; margin-bottom: 20px;">1. ¿PARA QUÉ USARÁS PRINCIPALMENTE TUS ZAPATILLAS?</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;">
+            <button class="btn btn-secondary" onclick="selectQuizAnswer('purpose', 'Urbano')" style="padding: 16px;">🏙️ Salir a la calle / Uso Urbano</button>
+            <button class="btn btn-secondary" onclick="selectQuizAnswer('purpose', 'Deporte')" style="padding: 16px;">⚡ Deporte y Entrenamiento</button>
+            <button class="btn btn-secondary" onclick="selectQuizAnswer('purpose', 'Uso diario')" style="padding: 16px;">👟 Uso Diario y Casual</button>
+          </div>
         </div>
       </div>
     </div>
@@ -486,7 +491,44 @@
       </div>
 
       <div id="trending-carousel" class="horizontal-scroll-container">
-        <!-- Injected via app.js -->
+        <!-- kv-01 -->
+        <div class="product-card" data-id="kv-01" onclick="openProductModal('kv-01')" style="min-width: 260px; cursor: pointer;">
+          <div class="product-media">
+            <div class="card-badges"><span class="badge badge-neon">🔥 TENDENCIA</span></div>
+            <img src="images/hero_sneaker.png" alt="AIR MAX URBAN X" loading="lazy">
+          </div>
+          <div class="product-info">
+            <span class="product-brand">EDICIÓN KICKVAULT</span>
+            <h3 class="product-title">AIR MAX URBAN X</h3>
+            <span class="product-price" style="color: var(--neon-green); font-weight: 800;">$699.900 COP</span>
+          </div>
+        </div>
+
+        <!-- kv-02 -->
+        <div class="product-card" data-id="kv-02" onclick="openProductModal('kv-02')" style="min-width: 260px; cursor: pointer;">
+          <div class="product-media">
+            <div class="card-badges"><span class="badge badge-neon">EXCLUSIVO</span></div>
+            <img src="images/drop_exclusive.png" alt="CYBER FORCE HIGH" loading="lazy">
+          </div>
+          <div class="product-info">
+            <span class="product-brand">SERIE LABORATORIO</span>
+            <h3 class="product-title">CYBER FORCE HIGH ED. 01</h3>
+            <span class="product-price" style="color: var(--neon-green); font-weight: 800;">$899.900 COP</span>
+          </div>
+        </div>
+
+        <!-- kv-03 -->
+        <div class="product-card" data-id="kv-03" onclick="openProductModal('kv-03')" style="min-width: 260px; cursor: pointer;">
+          <div class="product-media">
+            <div class="card-badges"><span class="badge badge-neon">⭐ MÁS VENDIDA</span></div>
+            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=500&q=70" alt="PHANTOM DUNK LOW" loading="lazy">
+          </div>
+          <div class="product-info">
+            <span class="product-brand">CULTURA URBANA</span>
+            <h3 class="product-title">PHANTOM DUNK LOW</h3>
+            <span class="product-price" style="color: var(--neon-green); font-weight: 800;">$549.900 COP</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -505,7 +547,21 @@
       </div>
 
       <div id="culture-grid" class="culture-grid">
-        <!-- Injected via app.js -->
+        <div class="culture-card" style="background: #111; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px;">
+          <span class="badge badge-neon" style="margin-bottom: 8px;">01 · DISEÑO TÉCNICO</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff; margin-bottom: 8px;">MATERIALES DE ALTA RESISTENCIA</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Cada silueta es seleccionada por la durabilidad de sus materiales sintéticos y la precisión en los acabados.</p>
+        </div>
+        <div class="culture-card" style="background: #111; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px;">
+          <span class="badge badge-neon" style="margin-bottom: 8px;">02 · EXCLUSIVIDAD</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff; margin-bottom: 8px;">DROPS Y EDICIONES LIMITADAS</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Lanzamientos globales con inventario contado para asegurar que lleves un par único en la ciudad.</p>
+        </div>
+        <div class="culture-card" style="background: #111; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px;">
+          <span class="badge badge-neon" style="margin-bottom: 8px;">03 · GARANTÍA</span>
+          <h3 style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff; margin-bottom: 8px;">ENVÍOS SEGUROS A TODO EL PAÍS</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Envíos inmediatos con seguimiento en tiempo real y soporte directo por WhatsApp.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -868,8 +924,8 @@
     </div>
   </div>
 
-  <!-- JavaScript Modules with strict cache-busting vSTATIC-HTML-PRODUCTS-GUARANTEE-999 -->
-  <script src="js/data.js?v=STATIC-HTML-PRODUCTS-GUARANTEE-999"></script>
-  <script src="js/app.js?v=STATIC-HTML-PRODUCTS-GUARANTEE-999"></script>
+  <!-- JavaScript Modules with strict cache-busting vMOBILE-RESPONSIVE-AND-SELECTION-FIX-1000 -->
+  <script src="js/data.js?v=MOBILE-RESPONSIVE-AND-SELECTION-FIX-1000"></script>
+  <script src="js/app.js?v=MOBILE-RESPONSIVE-AND-SELECTION-FIX-1000"></script>
 </body>
 </html>

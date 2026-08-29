@@ -709,51 +709,27 @@ function openProductModal(productId, mode = 'view') {
   const openSizesBtn = document.getElementById('modal-open-sizes-btn');
   const addCartBtn = document.getElementById('modal-add-cart-btn');
 
-  if (mode === 'size') {
-    // Mode 'size': Show green size selection box & Add to Cart button
-    if (sizeBox) sizeBox.style.display = 'block';
-    if (openSizesBtn) openSizesBtn.style.display = 'none';
-    if (addCartBtn) {
-      addCartBtn.style.display = 'block';
-      if (isSoldOut) {
-        addCartBtn.disabled = true;
-        addCartBtn.textContent = 'PRODUCTO AGOTADO (SIN STOCK) ❌';
-        addCartBtn.style.background = '#2b2b2b';
-        addCartBtn.style.color = '#777';
-        addCartBtn.style.cursor = 'not-allowed';
-        addCartBtn.style.pointerEvents = 'none';
-      } else {
-        addCartBtn.disabled = false;
-        addCartBtn.textContent = 'AGREGAR AL CARRITO +';
-        addCartBtn.style.background = '';
-        addCartBtn.style.color = '';
-        addCartBtn.style.cursor = '';
-        addCartBtn.style.pointerEvents = '';
-      }
-    }
-  } else {
-    // Mode 'view': INDEPENDENT showcase mode (ONLY sneaker pictures, description, price & action button to view sizes)
-    if (sizeBox) sizeBox.style.display = 'none';
-    if (addCartBtn) addCartBtn.style.display = 'none';
-    if (openSizesBtn) {
-      if (isSoldOut) {
-        openSizesBtn.style.display = 'block';
-        openSizesBtn.disabled = true;
-        openSizesBtn.textContent = 'PRODUCTO AGOTADO ❌';
-        openSizesBtn.style.background = '#2b2b2b';
-        openSizesBtn.style.color = '#777';
-        openSizesBtn.style.cursor = 'not-allowed';
-      } else {
-        openSizesBtn.style.display = 'block';
-        openSizesBtn.disabled = false;
-        openSizesBtn.textContent = 'VER TALLAS Y COMPRAR 🛒';
-        openSizesBtn.style.background = '';
-        openSizesBtn.style.color = '';
-        openSizesBtn.style.cursor = '';
-      }
+  // ALWAYS show size selector box & Add to Cart button for instant purchase
+  if (sizeBox) sizeBox.style.display = 'block';
+  if (openSizesBtn) openSizesBtn.style.display = 'none';
+  if (addCartBtn) {
+    addCartBtn.style.display = 'block';
+    if (isSoldOut) {
+      addCartBtn.disabled = true;
+      addCartBtn.textContent = 'PRODUCTO AGOTADO (SIN STOCK) ❌';
+      addCartBtn.style.background = '#2b2b2b';
+      addCartBtn.style.color = '#777';
+      addCartBtn.style.cursor = 'not-allowed';
+      addCartBtn.style.pointerEvents = 'none';
+    } else {
+      addCartBtn.disabled = false;
+      addCartBtn.textContent = 'AGREGAR AL CARRITO +';
+      addCartBtn.style.background = '';
+      addCartBtn.style.color = '';
+      addCartBtn.style.cursor = '';
+      addCartBtn.style.pointerEvents = '';
     }
   }
-
   modal.classList.add('active');
   modal.style.display = 'flex';
   modal.style.opacity = '1';
