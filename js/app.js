@@ -763,10 +763,7 @@ function openProductModal(productId, mode = 'size') {
   }
 
   modal.classList.add('active');
-  modal.style.display = 'flex';
-  modal.style.opacity = '1';
-  modal.style.visibility = 'visible';
-  modal.style.pointerEvents = 'auto';
+  modal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 999999 !important;';
   document.body.style.overflow = 'hidden';
 }
 
@@ -823,10 +820,7 @@ function closeProductModal() {
   const modal = document.getElementById('product-modal');
   if (modal) {
     modal.classList.remove('active');
-    modal.style.display = '';
-    modal.style.opacity = '';
-    modal.style.visibility = '';
-    modal.style.pointerEvents = '';
+    modal.style.cssText = 'display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;';
   }
   document.body.style.overflow = '';
 }

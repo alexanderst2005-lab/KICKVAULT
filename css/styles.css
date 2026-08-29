@@ -1144,6 +1144,24 @@ img {
   pointer-events: auto;
 }
 
+#product-modal.active,
+div#product-modal.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 999999 !important;
+}
+
+#product-modal.active .modal-container,
+div#product-modal.active .modal-container {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) scale(1) !important;
+  z-index: 1000000 !important;
+}
+
 .modal-container {
   background: #111111;
   border: 1px solid var(--border-color);
