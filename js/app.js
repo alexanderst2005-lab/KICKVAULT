@@ -740,11 +740,15 @@ function openProductModal(productId, mode = 'size') {
   const descEl = document.getElementById('modal-desc');
   if (descEl) descEl.textContent = product.description || 'Diseño de alto rendimiento urbano.';
 
-  // ALWAYS Show size box & Add to Cart button
-  switchModalToSizeMode();
-
+  const sizeBox = document.getElementById('modal-size-box');
+  const openSizesBtn = document.getElementById('modal-open-sizes-btn');
   const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+  if (sizeBox) sizeBox.style.display = 'block';
+  if (openSizesBtn) openSizesBtn.style.display = 'none';
+
   if (addCartBtn) {
+    addCartBtn.style.display = 'block';
     if (isSoldOut) {
       addCartBtn.disabled = true;
       addCartBtn.textContent = 'PRODUCTO AGOTADO (SIN STOCK) ❌';
@@ -762,15 +766,23 @@ function openProductModal(productId, mode = 'size') {
     }
   }
 
+  updateModalSizeDisplay();
+
   modal.classList.add('active');
   modal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 999999 !important;';
   document.body.style.overflow = 'hidden';
 }
 
 function switchModalToSizeMode() {
-  if (currentSelectedProduct) {
-    openProductModal(currentSelectedProduct.id, 'size');
-  }
+  const sizeBox = document.getElementById('modal-size-box');
+  const openSizesBtn = document.getElementById('modal-open-sizes-btn');
+  const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+  if (sizeBox) sizeBox.style.display = 'block';
+  if (openSizesBtn) openSizesBtn.style.display = 'none';
+  if (addCartBtn) addCartBtn.style.display = 'block';
+
+  updateModalSizeDisplay();
 }
 
 function updateModalSizeDisplay() {
