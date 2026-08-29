@@ -830,6 +830,8 @@ function addCurrentModalToCart() {
   }
   addToCart(currentSelectedProduct, currentSelectedSize, 1);
   closeProductModal();
+  openCartDrawer();
+  openCheckoutInDrawer();
 }
 
 function closeProductModal() {
@@ -1415,4 +1417,90 @@ function scrollToSection(sectionId) {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' });
   }
+}
+
+function openNewOrderFormAdmin() {
+  const modal = document.getElementById('admin-new-order-modal');
+  if (!modal) return;
+
+  const selectEl = document.getElementById('of-product-select');
+  if (selectEl) {
+    const products = getActiveProductsCatalog();
+    selectEl.innerHTML = products.map(p => `
+      <option value="${p.id}">${p.name} - ${formatCOP(p.price)}</option>
+    `).join('');
+  }
+
+  modal.classList.add('active');
+  modal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 999999 !important;';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAdminNewOrderModal() {
+  const modal = document.getElementById('admin-new-order-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.cssText = 'display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;';
+  }
+  document.body.style.overflow = '';
+}
+
+function saveNewOrderSubmitAdmin(e) {
+  if (e) e.preventDefault();
+
+  const name = document.getElementById('of-customer-name')?.value.trim() || "";
+  const phone = document.getElementById('of-customer-phone')?.value.trim() || "";
+  const email = document.getElementById('of-customer-email')?.value.trim() || "";
+  const city = document.getElementById('of-customer-city')?.value.trim() || "";
+  const neighborhood = document.getElementById('of-customer-neighborhood')?.value.trim() || "";
+  const address = document.getElementById('of-customer-address')?.value.trim() || "";
+  const productId = document.getElementById('of-product-select')?.value || "";
+  const size = parseInt(document.getElementById('of-product-size')?.value || "41");
+  const notes = document.getElementById('of-customer-notes')?.value.trim() || "";
+
+  if (!name || !phone || !email || !city || !address || !productId) {
+    showToast("Por favor completa los campos requeridos.");
+    return;
+  }
+
+  const products = getActiveProductsCatalog();
+  const product = products.find(p => p.id === productId) || products[0];
+
+  const orderNum = 'KV-' + Math.floor(1000 + Math.random() * 9000);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const fullAddressStr = `${address}${neighborhood ? ' (' + neighborhood + ')' : ''}, ${city}`;
+
+  const newOrder = {
+    orderId: orderNum,
+    customer: name,
+    phone: phone,
+    email: email,
+    city: city,
+    neighborhood: neighborhood,
+    address: fullAddressStr,
+    notes: notes,
+    date: dateStr,
+    statusStep: 1,
+    statusText: "Pedido recibido y registrado en sistema KICKVAULT",
+    trackingCarrier: "Servientrega Express",
+    totalPrice: formatCOP(product.price),
+    totalPriceNum: product.price,
+    items: [
+      {
+        name: product.name,
+        size: size,
+        price: formatCOP(product.price),
+        qty: 1
+      }
+    ]
+  };
+
+  const allOrders = loadAllOrders();
+  allOrders.unshift(newOrder);
+  saveAllOrders(allOrders);
+
+  closeAdminNewOrderModal();
+  renderAdminOrdersList();
+  showToast(`¡Pedido ${orderNum} registrado con éxito! 🔥`);
 }
