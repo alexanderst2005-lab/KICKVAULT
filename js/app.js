@@ -505,6 +505,152 @@ function renderCartDrawer() {
 
   if (subtotalEl) subtotalEl.textContent = formatCOP(subtotal);
   if (totalEl) totalEl.textContent = formatCOP(subtotal);
+
+  const headerTitle = document.querySelector('#cart-drawer-overlay .drawer-header h3');
+  if (headerTitle) headerTitle.textContent = 'TU CARRITO DE COMPRAS';
+
+  const footer = document.querySelector('#cart-drawer-overlay .drawer-footer');
+  if (footer) footer.style.display = 'block';
+}
+
+function openCheckoutInDrawer() {
+  if (cart.length === 0) {
+    showToast("⚠️ Tu carrito de compras está vacío. Agrega una zapatilla primero.");
+    return;
+  }
+  const container = document.getElementById('cart-items-container');
+  const footer = document.querySelector('#cart-drawer-overlay .drawer-footer');
+  const headerTitle = document.querySelector('#cart-drawer-overlay .drawer-header h3');
+
+  if (headerTitle) headerTitle.textContent = 'DATOS DE ENVÍO 🚚';
+
+  if (container) {
+    container.innerHTML = `
+      <div style="background: rgba(183, 255, 0, 0.05); border: 1.5px solid var(--border-active); padding: 14px; border-radius: var(--radius-md); margin-bottom: 14px;">
+        <span class="badge badge-neon" style="margin-bottom: 4px;">COMPRA REAL KICKVAULT</span>
+        <h4 style="font-size: 1.1rem; color: #fff; margin: 4px 0 6px 0;">INGRESA TUS DATOS DE ENTREGA 🚚</h4>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Escribe tu información completa para registrar tu pedido en el sistema.</p>
+      </div>
+
+      <form id="drawer-checkout-form" onsubmit="submitDrawerCheckoutOrder(event)" style="display: flex; flex-direction: column; gap: 10px;">
+        <div>
+          <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">NOMBRE COMPLETO *</label>
+          <input type="text" id="drawer-checkout-name" class="search-input-field" placeholder="Escribe tu nombre y apellido" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">TELÉFONO / WHATSAPP *</label>
+            <input type="tel" id="drawer-checkout-phone" class="search-input-field" placeholder="Número de contacto" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">CORREO ELECTRÓNICO *</label>
+            <input type="email" id="drawer-checkout-email" class="search-input-field" placeholder="tu@email.com" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">CIUDAD / MUNICIPIO *</label>
+            <input type="text" id="drawer-checkout-city" class="search-input-field" placeholder="Ej. Bogotá, Medellín" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">BARRIO *</label>
+            <input type="text" id="drawer-checkout-neighborhood" class="search-input-field" placeholder="Ej. Chapinero" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">DIRECCIÓN EXACTA (CASA / APTO) *</label>
+          <input type="text" id="drawer-checkout-address" class="search-input-field" placeholder="Ej. Calle 100 #15-32 Apto 402" value="" required style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; color: #ccc;">NOTAS ADICIONALES (OPCIONAL)</label>
+          <input type="text" id="drawer-checkout-notes" class="search-input-field" placeholder="Ej. Dejar en portería..." value="" style="font-size: 0.9rem; padding: 10px; width: 100%; box-sizing: border-box;">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="font-size: 1rem; padding: 14px; margin-top: 6px;">
+          CONFIRMAR PEDIDO Y ENVIAR 🚀
+        </button>
+
+        <button type="button" class="btn btn-secondary btn-block" onclick="renderCartDrawer()" style="font-size: 0.85rem; padding: 10px; border-color: #555;">
+          ← Volver a ver el carrito
+        </button>
+      </form>
+    `;
+  }
+
+  if (footer) {
+    footer.style.display = 'none';
+  }
+}
+
+function submitDrawerCheckoutOrder(e) {
+  if (e) e.preventDefault();
+  if (cart.length === 0) return;
+
+  const name = document.getElementById('drawer-checkout-name')?.value.trim() || "";
+  const phone = document.getElementById('drawer-checkout-phone')?.value.trim() || "";
+  const email = document.getElementById('drawer-checkout-email')?.value.trim() || "";
+  const city = document.getElementById('drawer-checkout-city')?.value.trim() || "";
+  const neighborhood = document.getElementById('drawer-checkout-neighborhood')?.value.trim() || "";
+  const address = document.getElementById('drawer-checkout-address')?.value.trim() || "";
+  const notes = document.getElementById('drawer-checkout-notes')?.value.trim() || "";
+
+  if (!name || !phone || !email || !city || !address) {
+    showToast("Por favor completa todos los campos requeridos para enviar tu pedido");
+    return;
+  }
+
+  const orderNum = 'KV-' + Math.floor(1000 + Math.random() * 9000);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
+  const fullAddressStr = `${address}${neighborhood ? ' (' + neighborhood + ')' : ''}, ${city}`;
+
+  const newOrder = {
+    orderId: orderNum,
+    customer: name,
+    phone: phone,
+    email: email,
+    city: city,
+    neighborhood: neighborhood,
+    address: fullAddressStr,
+    notes: notes,
+    date: dateStr,
+    statusStep: 1,
+    statusText: "Pedido recibido y confirmado en sistema KICKVAULT",
+    trackingCarrier: "Servientrega Express",
+    totalPrice: formatCOP(totalAmount),
+    totalPriceNum: totalAmount,
+    items: cart.map(item => ({
+      name: item.name,
+      size: item.size || 41,
+      price: formatCOP(item.price),
+      qty: item.qty || 1
+    }))
+  };
+
+  // Save to persistent storage for Admin Panel
+  const allOrders = loadAllOrders();
+  allOrders.unshift(newOrder);
+  saveAllOrders(allOrders);
+
+  // Clear cart & reset drawer
+  cart = [];
+  saveCart();
+  closeCartDrawer();
+  renderCartDrawer();
+
+  showToast(`¡Pedido ${orderNum} registrado con éxito! 🔥`);
+
+  // Open Order Tracking Timeline Modal
+  openTrackingModal();
+  const inputEl = document.getElementById('tracking-input');
+  if (inputEl) inputEl.value = orderNum;
+  searchOrderTracking();
 }
 
 /* ==========================================================================
@@ -1139,6 +1285,57 @@ function closeAdminOrdersModal() {
   const modal = document.getElementById('admin-orders-modal');
   if (modal) modal.classList.remove('active');
   document.body.style.overflow = '';
+}
+
+const ORDERS_STORAGE_KEY = 'kickvault_all_orders_v1';
+
+function getInitialSampleOrders() {
+  return [
+    {
+      orderId: "KV-8921",
+      customer: "Mateo Alexander",
+      phone: "3001234567",
+      email: "mateo@kickvault.co",
+      city: "Bogotá",
+      neighborhood: "Chapinero Alto",
+      address: "Calle 67 #12-45 Apto 502 (Chapinero Alto), Bogotá",
+      notes: "Timbrar en la portería principal",
+      date: "28 de agosto, 2026 - 22:30",
+      statusStep: 1,
+      statusText: "Pedido recibido y confirmado en sistema KICKVAULT",
+      trackingCarrier: "Servientrega Express",
+      totalPrice: "$1.599.800 COP",
+      totalPriceNum: 1599800,
+      items: [
+        { name: "CYBER FORCE HIGH ED. 01", size: 38, price: "$899.900 COP", qty: 1 },
+        { name: "AIR MAX URBAN X", size: 42, price: "$699.900 COP", qty: 1 }
+      ]
+    }
+  ];
+}
+
+function loadAllOrders() {
+  try {
+    const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
+    if (!raw) {
+      const sample = getInitialSampleOrders();
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(sample));
+      return sample;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error("Error loading orders from localStorage:", e);
+    return getInitialSampleOrders();
+  }
+}
+
+function saveAllOrders(ordersArray) {
+  try {
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(ordersArray));
+  } catch (e) {
+    console.error("Error saving orders to localStorage:", e);
+  }
 }
 
 function renderAdminOrdersList() {
