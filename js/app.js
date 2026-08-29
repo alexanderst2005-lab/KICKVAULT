@@ -681,10 +681,22 @@ function selectModalSize(size, chipEl) {
   updateModalSizeDisplay();
 }
 
+function switchModalToSizeMode() {
+  const sizeBox = document.getElementById('modal-size-box');
+  const openSizesBtn = document.getElementById('modal-open-sizes-btn');
+  const addCartBtn = document.getElementById('modal-add-cart-btn');
+
+  if (sizeBox) sizeBox.style.display = 'block';
+  if (openSizesBtn) openSizesBtn.style.display = 'none';
+  if (addCartBtn) addCartBtn.style.display = 'block';
+
+  updateModalSizeDisplay();
+}
+
 /* ==========================================================================
    PRODUCT DETAIL MODAL (PROMINENT SIZE SELECTION)
    ========================================================================== */
-function openProductModal(productId, mode = 'view') {
+function openProductModal(productId, mode = 'size') {
   const products = getActiveProductsCatalog();
   const product = products.find(p => p.id === productId);
   if (!product) return;
@@ -708,17 +720,14 @@ function openProductModal(productId, mode = 'view') {
     `).join('');
   }
 
-  // Update Size Selector & Label Display
-  updateModalSizeDisplay();
-
   const mainImg = document.getElementById('modal-main-img');
   if (mainImg) mainImg.src = (product.images && product.images[0]) ? product.images[0] : '';
   
   const brandEl = document.getElementById('modal-brand');
-  if (brandEl) brandEl.textContent = product.brand;
+  if (brandEl) brandEl.textContent = product.brand || 'EDICIÓN KICKVAULT';
 
   const titleEl = document.getElementById('modal-title');
-  if (titleEl) titleEl.textContent = product.name;
+  if (titleEl) titleEl.textContent = product.name || 'ZAPATILLA KICKVAULT';
 
   const priceEl = document.getElementById('modal-price');
   if (priceEl) {
@@ -726,21 +735,16 @@ function openProductModal(productId, mode = 'view') {
   }
 
   const colorEl = document.getElementById('modal-color');
-  if (colorEl) colorEl.textContent = product.color;
+  if (colorEl) colorEl.textContent = product.color || 'EDICIÓN ESPECIAL';
 
   const descEl = document.getElementById('modal-desc');
-  if (descEl) descEl.textContent = product.description;
+  if (descEl) descEl.textContent = product.description || 'Diseño de alto rendimiento urbano.';
 
-  // Handle Mode Display: 'view' (VER MODELO - NO sizes/cart) vs 'size' (VER TALLAS - shows sizes/cart)
-  const sizeBox = document.getElementById('modal-size-box');
-  const openSizesBtn = document.getElementById('modal-open-sizes-btn');
+  // ALWAYS Show size box & Add to Cart button
+  switchModalToSizeMode();
+
   const addCartBtn = document.getElementById('modal-add-cart-btn');
-
-  // ALWAYS show size selector box & Add to Cart button for instant purchase
-  if (sizeBox) sizeBox.style.display = 'block';
-  if (openSizesBtn) openSizesBtn.style.display = 'none';
   if (addCartBtn) {
-    addCartBtn.style.display = 'block';
     if (isSoldOut) {
       addCartBtn.disabled = true;
       addCartBtn.textContent = 'PRODUCTO AGOTADO (SIN STOCK) ❌';
@@ -757,6 +761,7 @@ function openProductModal(productId, mode = 'view') {
       addCartBtn.style.pointerEvents = '';
     }
   }
+
   modal.classList.add('active');
   modal.style.display = 'flex';
   modal.style.opacity = '1';
