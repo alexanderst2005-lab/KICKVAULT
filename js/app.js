@@ -514,6 +514,10 @@ function renderCartDrawer() {
   if (footer) footer.style.display = 'block';
 }
 
+function processCheckout() {
+  openCheckoutInDrawer();
+}
+
 function openCheckoutInDrawer() {
   if (cart.length === 0) {
     showToast("⚠️ Tu carrito de compras está vacío. Agrega una zapatilla primero.");
